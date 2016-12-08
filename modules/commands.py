@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import time
+import csv
 from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
-from telegram.ext import CommandHandler, MessageHandler, Filters
+from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from validators import url, ValidationFailure
 
 from store import TinyDBStore
@@ -164,6 +165,37 @@ def parse_fields(field, value):
 def help_command(bot, update):
     bot.sendMessage(update.message.chat_id, text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
 
+def platform(bot, update):
+    query = update.callback_query
+    bot.editMessageText(text="Heu triat el paquet de llengua per la plataforma: %s" % query.data,
+                        chat_id=query.message.chat_id,
+                        message_id=query.message.message_id)
+    #user_id = update.message.from_user.id
+    platform_name= query.data
+    writer = csv.writer(open("stats.csv", 'w'))
+    writer.writerow([platform_name])
+
+def download_command(bot, update):
+    user_id = update.message.from_user.id
+    # Replace USER_ID with your user_id number:
+    if user_id == USER_ID:
+        keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
+                     InlineKeyboardButton("iOS", callback_data='iOS')],
+                    [InlineKeyboardButton("Windows Phone", callback_data='WP'),
+                     InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]]
+
+        bot.sendMessage(update.message.chat_id,
+                    parse_mode='Markdown',
+                    text= "Trieu la plataforma del paquet de llengua que voleu baixar:",
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+        )
+
+    else:
+        f_name = update.message.from_user.first_name
+        bot.sendMessage(update.message.chat_id,
+                    parse_mode='Markdown',
+                    text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+    
 class CommandsModule(object):
     def __init__(self):
         self.handlers = [
@@ -171,6 +203,8 @@ class CommandsModule(object):
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
+            CommandHandler('baixa', download_command),
+            CallbackQueryHandler(platform),
             MessageHandler([Filters.text], self.message)
         ]
         self.store = TinyDBStore()
