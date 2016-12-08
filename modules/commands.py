@@ -183,10 +183,10 @@ def download_command(bot, update):
     user_id = update.message.from_user.id
     # Replace USER_ID with your user_id number:
     if user_id == USER_ID:
-        keyboard = [InlineKeyboardButton("Android", callback_data='Android'),
+        keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
                      InlineKeyboardButton("iOS", callback_data='iOS'),
                     # [InlineKeyboardButton("Windows Phone", callback_data='WP'),
-		  InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]
+		  InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]]
 
         bot.sendMessage(update.message.chat_id,
                     parse_mode='Markdown',
