@@ -170,6 +170,10 @@ def platform(bot, update):
     bot.editMessageText(text="Heu triat el paquet de llengua per la plataforma: %s" % query.data,
                         chat_id=query.message.chat_id,
                         message_id=query.message.message_id)
+    bot.sendMessage(query.message.chat_id,
+		    text="Aquí teniu el paquet. Apanyeu-se-les per insl·lar-lo 😝")
+   bot.sendDocument(update.message.chat_id,
+		    "BQADBAADgBkAAgdxMQVGngQnfYvp7QI")
     #user_id = update.message.from_user.id
     platform_name= query.data
     writer = csv.writer(open("stats.csv", 'w'))
@@ -181,12 +185,12 @@ def download_command(bot, update):
     if user_id == USER_ID:
         keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
                      InlineKeyboardButton("iOS", callback_data='iOS')],
-                    [InlineKeyboardButton("Windows Phone", callback_data='WP'),
-                     InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]]
+                    # [InlineKeyboardButton("Windows Phone", callback_data='WP'),
+		  InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]
 
         bot.sendMessage(update.message.chat_id,
                     parse_mode='Markdown',
-                    text= "Trieu la plataforma del paquet de llengua que voleu baixar:",
+                    text= "Hola, sóc el *Robot de Softcatalà*! La meua funció és proporcionar els paquets de llengua per a les diferents aplicacions del Telegram que els admeten.\nTrieu el sistema operatiu que esteu utilitzant per baixar el paquet de llengua adequat:",
                     reply_markup = InlineKeyboardMarkup(keyboard)
         )
 
