@@ -184,7 +184,7 @@ def download_command(bot, update):
     # Replace USER_ID with your user_id number:
     if user_id == USER_ID:
         keyboard = [InlineKeyboardButton("Android", callback_data='Android'),
-                     InlineKeyboardButton("iOS", callback_data='iOS')],
+                     InlineKeyboardButton("iOS", callback_data='iOS'),
                     # [InlineKeyboardButton("Windows Phone", callback_data='WP'),
 		  InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]
 
