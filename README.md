@@ -32,9 +32,9 @@ Then, you need to install requirements. Go to the directory where requirements.t
 $sudo pip3 install -r requirements.txt
 ```
 
-Add your [Telegram token](https://github.com/nilmoreno/create-event-bot/blob/master/bot.py#L31)
+Add your [Telegram token](https://github.com/Softcatala/SoftcatalaBot/blob/master/bot.py#L31)
 
-Add your [allowed users id](https://github.com/nilmoreno/create-event-bot/blob/master/modules/commands.py#L156). <br/>You can know it with some bots like [@MyIDbot](http://telegram.me/myidbot).
+Add your [allowed users id](https://github.com/Softcatala/SoftcatalaBot/blob/master/modules/commands.py#L181). <br/>You can know it with some bots like [@MyIDbot](http://telegram.me/myidbot).
 
 And finally launch the bot with (in the directory where bot.py are):
 ```
