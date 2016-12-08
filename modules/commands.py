@@ -170,7 +170,7 @@ def platform(bot, update):
     bot.editMessageText(text="Heu triat el paquet de llengua per la plataforma: %s" % query.data,
                         chat_id=query.message.chat_id,
                         message_id=query.message.message_id)
-    bot.sendMessage(query.message.chat_id,
+    bot.sendMessage(update.message.chat_id,
 		    text="Aquí teniu el paquet. Apanyeu-se-les per insl·lar-lo 😝")
    bot.sendDocument(update.message.chat_id,
 		    file_id="BQADBAADgBkAAgdxMQVGngQnfYvp7QI")
