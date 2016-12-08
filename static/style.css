@@ -1,0 +1,142 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    background: #2a2a2a;
+    font-family: 'Roboto', sans-serif;
+}
+
+.page {
+    display: none;
+}
+
+.picture {
+    color: black;
+    height: 200px;
+
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+
+    background-color: black;
+/*  background-size: cover; */
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+
+#logo {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    top: 70px;
+    right: 20px;
+}
+
+.container {
+    width: 95%;
+    box-shadow: rgba(0, 0, 0) 0 1px 4px;
+    border-radius: 4px;
+    margin: 25px auto 0;
+}
+
+.event {
+    padding: 36px;
+    color: black;
+    font-size: 1.5em; 
+
+/*  border-top-left-radius: 4px;
+    border-top-right-radius: 4px; */
+
+    background-color: #F2F2F2;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center right;
+}
+
+#title {
+    font-weight: 500;
+}
+
+#place {
+    border-bottom: 2px dotted black;
+    display: inline;
+    cursor: pointer;
+}
+
+#parking {
+    border-bottom: 2px dotted black;
+    display: inline;
+    cursor: pointer;
+}
+
+#route {
+    border-bottom: 2px dotted black;
+    display: inline;
+    cursor: pointer;
+}
+
+#date {
+    font-weight: bold;
+}
+
+.event *:first-child {
+    margin-top: 0;
+}
+
+.event *:last-child {
+    margin-bottom: 0;
+}
+
+#iframe {
+    padding: 0 36px 0 36px;
+    background-color: #F2F2F2;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center right;
+}
+
+.add {
+    padding: 36px;
+    background: white;
+
+    border-bottom-right-radius: 24px;
+    border-bottom-left-radius: 24px;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 2px;
+    margin-bottom: 50px;
+    color: #a2a2a2;
+    padding: 5px 5px 5px 5px;
+/*  background: #6e6e6e; */
+}
+
+.place a {color: #000;}
+.place a:hover{color: #013ADF;}
+.place a:visited{color: #2a2a2a;}
+
+.add a {color: #000;}
+.add a:hover{color: #013ADF;}
+.add a:visited{color: #2a2a2a;}
+
+.footer a {color: #fff;}
+.footer a:hover{color: #81DAF5;}
+.footer a:visited{color: #6e6e6e;}
+
+img.emoji {  
+  // Override any img styles to ensure Emojis are displayed inline
+  margin: 0px !important;
+  display: inline !important;
+}
+
+/*@media all and (max-width : 400px) {
+	.event {
+		font-size: 2em;
+	}
+}
+
+@media all and (min-width : 400px) {
+	.event {
+		font-size: 1.5em;
+	}
+}*/
