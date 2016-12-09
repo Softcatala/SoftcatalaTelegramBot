@@ -165,52 +165,6 @@ def parse_fields(field, value):
 def help_command(bot, update):
     bot.sendMessage(update.message.chat_id, text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
 
-def platform(bot, update):
-    query = update.callback_query
-    platform_name= query.data
-    if platform_name == 'Android':
-          filepack= "https://gent.softcatala.org/albert/.fitxers/Telegram/strings.xml"
-          textpack= "Us enviem la versió 24/11/2016 del paquet de llengua. Podeu demanar la versió més actual del paquet sempre que ho desitgeu.\n\nInstruccions d'instal·lació:\n1r. Baixeu el fitxer «strings.xml» enviat després d'aquest missatge fent clic a la icona de fletxa avall.\n2n. Feu clic al símbol ⋮ per a obrir el menú d'opcions.\n3r. Trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n4t. Trieu l'opció «Català».\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al canal de Softcatalà (@CanalSoftcatala)."
-    elif platform_name == 'iOS':
-          filepack= "https://gent.softcatala.org/albert/.fitxers/Telegram/Localizable-ios.strings"
-          textpack= "Us enviem la versió 24/11/2016 del paquet de llengua. Podeu demanar la versió més actual del paquet sempre que ho desitgeu.\n\nInstruccions:\n1r. Baixeu el fitxer «Localizable-ios.strings» enviat.\n2n. Trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al canal de Softcatalà (@CanalSoftcatala)."
-    elif platform_name == 'tdesktop':
-          filepack= "https://gent.softcatala.org/albert/.fitxers/Telegram/tdesktop.strings"
-          textpack= "Us enviem la versió 24/11/2016 del paquet de llengua. Podeu demanar la versió més actual del paquet sempre que ho desitgeu.\n\nIntruccions d'instal·lació:\n1r. Baixeu el fitxer «tdesktop.strings» enviat després d'aquest missatge i recordeu la carpeta on es troba, habitualment './Baixades/Telegram Desktop' del vostre perfil d'usuari.\n2n. Aneu a la configuració del Telegram Desktop («Settings» o «Ajustes», secció «General») i, a l'aire, escriviu «loadlang».\n3r. Trieu el fitxer «tdesktop.strings» baixat al pas 1.\n4t. Reinicieu el Telegram Desktop.\n\nNota: no esborreu de l'ordinador el fitxer que heu baixat.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al canal de Softcatalà (@CanalSoftcatala)."
-
-    bot.editMessageText(chat_id=query.message.chat_id,
-                        message_id=query.message.message_id,
-		        parse_mode='Markdown',
-                        text=textpack)
-
-    bot.sendDocument(chat_id=query.message.chat_id,
-                     reply_to_message_id=query.message.message_id,
-		     document=filepack)
-    #user_id = update.message.from_user.id
-    writer = csv.writer(open("stats.csv", 'w'))
-    writer.writerow([platform_name])
-
-def download_command(bot, update):
-    user_id = update.message.from_user.id
-    # Replace USER_ID with your user_id number:
-    if user_id == USER_ID:
-        keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
-                     InlineKeyboardButton("iOS", callback_data='iOS'),
-                    #InlineKeyboardButton("Windows Phone", callback_data='WP'),
-		     InlineKeyboardButton("Telegram Desktop", callback_data='tdesktop')]]
-
-        bot.sendMessage(update.message.chat_id,
-                    parse_mode='Markdown',
-                    text= "Hola, sóc el *Robot de Softcatalà*! La meua funció és proporcionar els paquets de llengua per a les diferents aplicacions del Telegram que els admeten.\nTrieu el sistema operatiu que esteu utilitzant per baixar el paquet de llengua adequat:",
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-        )   
-
-    else:
-        f_name = update.message.from_user.first_name
-        bot.sendMessage(update.message.chat_id,
-                    parse_mode='Markdown',
-                    text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
-    
 class CommandsModule(object):
     def __init__(self):
         self.handlers = [
@@ -218,8 +172,8 @@ class CommandsModule(object):
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
-            CommandHandler('baixa', download_command),
-            CallbackQueryHandler(platform),
+            #CommandHandler('baixa', download_command),
+            #CallbackQueryHandler(platform),
             MessageHandler([Filters.text], self.message)
         ]
         self.store = TinyDBStore()
