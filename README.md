@@ -3,7 +3,7 @@
 * **SoftcatalaBot** is a Telegram inline bot based on [@createeventbot](https://telegram.me/createeventbot).
 * This bot is private, only users with permissions can create content :closed_lock_with_key:
 * Idea: Organization administrators create content with this Telegram bot, and share it in a Telegram channel.
-* Softcatalà is a non-proffit organization: [**Softcatalà**](https://www.softcatala.org/) 
+* Softcatalà is a non-profit organization: [**Softcatalà**](https://www.softcatala.org/) 
 
 Descripció
 ----------
