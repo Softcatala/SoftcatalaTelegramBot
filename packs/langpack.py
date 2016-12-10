@@ -21,6 +21,10 @@ class LangpackModule(object):
         ]
 
     def get_platforms():
+        global version
+        f= open("version.txt","r")
+        version= f.read(10)
+        f.close()
         global fandroid
         fandroid= "https://gent.softcatala.org/albert/.fitxers/Telegram/strings.xml"
         global fios
@@ -28,11 +32,12 @@ class LangpackModule(object):
         global ftdesktop
         ftdesktop= "https://gent.softcatala.org/albert/.fitxers/Telegram/tdesktop.strings"
         global tandroid
-        tandroid= "Heu triat el paquet de llengua per a *Telegram Android*.\n\nUs enviem la versió 24/11/2016 del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «strings.xml» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Feu clic al símbol ⋮ per a obrir el *menú d'opcions*.\n3r. Trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n4t. Trieu l'opció «Català».\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+        tandroid= "Heu triat el paquet de llengua per a *Telegram Android*.\n\nUs enviem la versió " + str(version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «strings.xml» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Feu clic al símbol ⋮ per a obrir el *menú d'opcions*.\n3r. Trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n4t. Trieu l'opció «Català».\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
         global tios
-        tios= "Heu triat el paquet de llengua per a *Telegram iOS*.\n\nUs enviem la versió 24/11/2016 del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «Localizable-ios.strings» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Premeu sobre el fitxer baixat i trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+        tios= "Heu triat el paquet de llengua per a *Telegram iOS*.\n\nUs enviem la versió " + str(version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «Localizable-ios.strings» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Premeu sobre el fitxer baixat i trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
         global ttdesktop
-        ttdesktop= "Heu triat el paquet de llengua per a *Telegram Desktop*.\n\nUs enviem la versió 24/11/2016 del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Intruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «tdesktop.strings» enviat després d'aquest missatge i recordeu la carpeta on es troba, habitualment `./Baixades/Telegram Desktop` del vostre perfil d'usuari.\n2n. Aneu a la configuració del Telegram Desktop («Settings» o «Ajustes») i, *a l'aire, teclegeu* «loadlang».\n3r. Trieu el fitxer «tdesktop.strings» baixat al pas 1.\n4t. Confirmeu el reinici del Telegram Desktop.\n\n*Nota*: no esborreu de l'ordinador el fitxer que heu baixat.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+        ttdesktop= "Heu triat el paquet de llengua per a *Telegram Desktop*.\n\nUs enviem la versió " + str(version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Intruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «tdesktop.strings» enviat després d'aquest missatge i recordeu la carpeta on es troba, habitualment `./Baixades/Telegram Desktop` del vostre perfil d'usuari.\n2n. Aneu a la configuració del Telegram Desktop («Settings» o «Ajustes») i, *a l'aire, teclegeu* «loadlang».\n3r. Trieu el fitxer «tdesktop.strings» baixat al pas 1.\n4t. Confirmeu el reinici del Telegram Desktop.\n\n*Nota*: no esborreu de l'ordinador el fitxer que heu baixat.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+
     get_platforms()
 
     def platform_handler(self, bot, update,):
@@ -48,13 +53,19 @@ class LangpackModule(object):
               filepack= ftdesktop
               textpack= ttdesktop
 
-        bot.editMessageText(chat_id=query.message.chat_id,
-                            message_id=query.message.message_id,
+        #f= open("version.txt","r")
+        #version= f.read(10)
+        #f.close()
+
+        bot.sendMessage(chat_id=query.message.chat_id,
+        #bot.editMessageText(chat_id=query.message.chat_id,
+                            #message_id=query.message.message_id,
 		            parse_mode='Markdown',
+                            disable_web_page_preview=True,
                             text=textpack)
 
         bot.sendDocument(chat_id=query.message.chat_id,
-                         reply_to_message_id=query.message.message_id,
+                         #reply_to_message_id=query.message.message_id,
                          document=filepack)
 
         user_id = update.callback_query.from_user.id
@@ -71,14 +82,14 @@ class LangpackModule(object):
            month = str(monthraw)
         year = today.year
         today2= day + '/' + month + '/' + str(year)
-        f= open("version.txt","r")
-        version= f.read(10)
-        f.close()
 
         stat= today2 + ';user#id' + str(user_id) + ';' + str(version) + ';' + platform_name
         with open('stats.csv','a',newline='') as f:
              writer=csv.writer(f)
              writer.writerow([stat])
+
+        #callback_id = query.get('callback_query', {}).get('id')
+        #self.telegram_api.answerCallbackQuery(callback_id)
 
     def download_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -107,6 +118,7 @@ class LangpackModule(object):
         if user_id == USER_ID:
             bot.sendMessage(update.message.chat_id,
                             parse_mode='Markdown',
+                            disable_web_page_preview=True,
                             text= tandroid
             )
             bot.sendDocument(update.message.chat_id,
@@ -124,6 +136,7 @@ class LangpackModule(object):
         if user_id == USER_ID:
             bot.sendMessage(update.message.chat_id,
                             parse_mode='Markdown',
+                            disable_web_page_preview=True,
                             text= tios
             )
             bot.sendDocument(update.message.chat_id,
@@ -141,6 +154,7 @@ class LangpackModule(object):
         if user_id == USER_ID:
             bot.sendMessage(update.message.chat_id,
                             parse_mode='Markdown',
+                            disable_web_page_preview=True,
                             text= ttdesktop
             )
             bot.sendDocument(update.message.chat_id,
