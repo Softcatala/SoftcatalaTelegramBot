@@ -15,7 +15,7 @@ Descripció
 General usage
 -------------
 
-Usage: @celp_bot [content name]
+Usage: @SoftcatalaBot [content name]
 
 Installation
 ------------
