@@ -1,10 +1,11 @@
 from tinydb import TinyDB, Query
 
+from config import paths
 
 class TinyDBStore(object):
     def __init__(self):
-        self.drafts_db = TinyDB('event_drafts.json')
-        self.events_db = TinyDB('events.json')
+        self.drafts_db = TinyDB(paths['posts']+'event_drafts.json')
+        self.events_db = TinyDB(paths['posts']+'events.json')
 
     # Drafts
     def contains_draft(self, user_id):

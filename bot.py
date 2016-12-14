@@ -12,6 +12,8 @@ from modules.commands import CommandsModule
 from modules.inline import InlineModule
 from packs.langpack import LangpackModule
 
+from config import params
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -33,7 +35,7 @@ def load_langpack(dispatcher, packs):
             dispatcher.add_handler(handler2)
 
 def main():
-    updater = Updater('TOKEN')
+    updater = Updater(params['token'])
 
     dp = updater.dispatcher
 

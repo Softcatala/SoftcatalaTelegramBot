@@ -11,6 +11,8 @@ from validators import url, ValidationFailure
 
 from store import TinyDBStore
 
+from config import allowed_users, paths
+
 FIELDS = [
     {
         'name': 'name',
@@ -94,7 +96,7 @@ FIELDS = [
     },
     {
         'name': 'validate',
-        'message': '\u0038\u20E3 Comproveu que les dades són correctes i que acabeu de rebre els fitxers que heu actualitzat. Si no és així, premeu «No» i cancel·lareu l\'actualització dels paquets',
+        'message': '\u0038\u20E3 Comproveu que les dades són correctes i que rebeu els fitxers que heu actualitzat. Si no és així, premeu «No» i cancel·lareu l\'actualització dels paquets',
         'required': False
     },
 ]
@@ -110,7 +112,7 @@ def parse_fields(field, value):
                  if value == 'Esdeveniment' or value == 'Notícia':  
                       return value
                  if value == 'Paquets de llengua':
-                      if '"type": "Paquets de llengua"' in open('event_drafts.json').read():
+                      if '"type": "Paquets de llengua"' in open(paths['posts']+'event_drafts.json').read():
                            error3= 'error3'
                            return error3
                       else:
@@ -119,7 +121,7 @@ def parse_fields(field, value):
                       valuecap = value.capitalize()  
                       return valuecap
                  elif value == 'paquets de llengua':
-                      if '"type": "Paquets de llengua"' in open('event_drafts.json').read():
+                      if '"type": "Paquets de llengua"' in open(paths['posts']+'event_drafts.json').read():
                            error3= 'error3'
                            return error3
                       else:
@@ -211,11 +213,8 @@ def parse_fields(field, value):
                       error = 'error'
                       return error
              return value
-
-    ### REVIEW!!!!!!!!
     elif field == 'android':
-        #if value == '':
-             f= open("packs/file_ids/draft_and_file_id.txt","r")
+             f= open(paths['file_ids']+"draft_and_file_id.txt","r")
              and_file_id= f.read(32)
              f.close()
              if and_file_id == '--------------------------------':
@@ -224,8 +223,7 @@ def parse_fields(field, value):
              else:
                   return str(and_file_id)
     elif field == 'ios':
-        #if value == '':
-             f= open("packs/file_ids/draft_ios_file_id.txt","r")
+             f= open(paths['file_ids']+"draft_ios_file_id.txt","r")
              ios_file_id= f.read(32)
              f.close()
              if ios_file_id == '--------------------------------':
@@ -234,8 +232,7 @@ def parse_fields(field, value):
              else:
                   return str(ios_file_id)
     elif field == 'tdesktop':
-        #if value == '':
-             f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+             f= open(paths['file_ids']+"draft_tdesk_file_id.txt","r")
              tdesk_file_id= f.read(32)
              f.close()
              if tdesk_file_id == '--------------------------------':
@@ -254,16 +251,13 @@ class CommandsModule(object):
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
-            #CommandHandler('baixa', download_command),
-            #CallbackQueryHandler(platform),
             MessageHandler([Filters.text,Filters.document], self.message)
         ]
         self.store = TinyDBStore()
 
     def start_command(self, bot, update, args):
         user_id = update.message.from_user.id
-        # Replace USER_ID with your user_id number:
-        if user_id == USER_ID:
+        if str(user_id) in allowed_users.values():
             self.store.new_draft(user_id)
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
                         text="Crearem una publicació per a compartir.\n\n\u0031\u20E3 El primer que heu de fer és enviar-me el *nom de la publicació*.\n\nSi no voleu continuar amb el procés, envieu /cancel.",
@@ -485,12 +479,12 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Android anomenat strings.xml amb l'identificador _" + file_id + "_."
                         )
-                        f=open('packs/file_ids/draft_and_file_id.txt','w')
+                        f=open(paths['file_ids']+'draft_and_file_id.txt','w')
                         f.write(file_id)
                         f.close()
                         event[field['name']] = parse_fields(field['name'], text)
                         android_version= event['date_version']
-                        f=open('packs/versions/draft_and_version.txt','w')
+                        f=open(paths['versions']+'draft_and_version.txt','w')
                         f.write(android_version)
                         f.close()
                         current_field += 1
@@ -513,12 +507,12 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a iOS anomenat Localizable-ios.strings amb l'identificador _" + file_id + "_."
                         )
-                        f=open('packs/file_ids/draft_ios_file_id.txt','w')
+                        f=open(paths['file_ids']+'draft_ios_file_id.txt','w')
                         f.write(file_id)
                         f.close()
                         event[field['name']] = parse_fields(field['name'], text)
                         ios_version= event['date_version']
-                        f=open('packs/versions/draft_ios_version.txt','w')
+                        f=open(paths['versions']+'draft_ios_version.txt','w')
                         f.write(ios_version)
                         f.close()
                         current_field += 1
@@ -541,12 +535,12 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Telegram Desktop anomenat tdesktop.strings amb l'identificador _" + file_id + "_."
                         )
-                        f=open('packs/file_ids/draft_tdesk_file_id.txt','w')
+                        f=open(paths['file_ids']+'draft_tdesk_file_id.txt','w')
                         f.write(file_id)
                         f.close()
                         event[field['name']] = parse_fields(field['name'], text)
                         tdesk_version= event['date_version']
-                        f=open('packs/versions/draft_tdesk_version.txt','w')
+                        f=open(paths['versions']+'draft_tdesk_version.txt','w')
                         f.write(tdesk_version)
                         f.close()
                         current_field += 1
@@ -596,11 +590,11 @@ class CommandsModule(object):
             elif field['name'] == 'android':
                 event = draft['event']
                 android_version= 'Not updated'
-                f=open('packs/versions/draft_and_version.txt','w')
+                f=open(paths['versions']+'draft_and_version.txt','w')
                 f.write(android_version)
                 f.close()
                 file_id= '--------------------------------'
-                f=open('packs/file_ids/draft_and_file_id.txt','w')
+                f=open(paths['file_ids']+'draft_and_file_id.txt','w')
                 f.write(file_id)
                 f.close()
                 value= 'null'
@@ -610,11 +604,11 @@ class CommandsModule(object):
             elif field['name'] == 'ios':
                 event = draft['event']
                 ios_version= 'Not updated'
-                f=open('packs/versions/draft_ios_version.txt','w')
+                f=open(paths['versions']+'draft_ios_version.txt','w')
                 f.write(ios_version)
                 f.close()
                 file_id= '--------------------------------'
-                f=open('packs/file_ids/draft_ios_file_id.txt','w')
+                f=open(paths['file_ids']+'draft_ios_file_id.txt','w')
                 f.write(file_id)
                 f.close()
                 value= 'null'
@@ -624,11 +618,11 @@ class CommandsModule(object):
             elif field['name'] == 'tdesktop':
                 event = draft['event']
                 tdesk_version= 'Not updated'
-                f=open('packs/versions/draft_tdesk_version.txt','w')
+                f=open(paths['versions']+'draft_tdesk_version.txt','w')
                 f.write(tdesk_version)
                 f.close()
                 file_id= '--------------------------------'
-                f=open('packs/file_ids/draft_tdesk_file_id.txt','w')
+                f=open(paths['file_ids']+'draft_tdesk_file_id.txt','w')
                 f.write(file_id)
                 f.close()
                 value= 'null'
@@ -898,6 +892,9 @@ class CommandsModule(object):
                  else:
                       monthnum = '12'
                  newdate = day + "/" + monthnum + "/" + year
+                 draftverstxt=open(paths['versions']+'draft_cur_version.txt','w')
+                 draftverstxt.write(newdate)
+                 draftverstxt.close()
                  bot.sendMessage(
                     update.message.chat_id,
                     parse_mode='Markdown',
@@ -912,47 +909,41 @@ class CommandsModule(object):
 
             elif FIELDS[current_field]['name'] == 'validate':
                 if event['android'] != 'NOT':
-                     f= open("packs/file_ids/draft_and_file_id.txt","r")
+                     f= open(paths['file_ids']+"draft_and_file_id.txt","r")
                      and_file_id= f.read(32)
                      f.close()
-                     f= open("packs/versions/draft_and_version.txt","r")
+                     f= open(paths['versions']+"draft_and_version.txt","r")
                      and_version= f.read(10)
                      f.close()
                      emoji_and= '\u2705 '
-                     bot.sendDocument(chat_id=update.message.chat_id,
-                         document=and_file_id)
                 else:
-                     f= open("packs/versions/android_version.txt","r")
+                     f= open(paths['versions']+"android_version.txt","r")
                      and_version= f.read(10)
                      f.close()
                      emoji_and= '\u274C '
                 if event['ios'] != 'NOT':
-                     f= open("packs/file_ids/draft_ios_file_id.txt","r")
+                     f= open(paths['file_ids']+"draft_ios_file_id.txt","r")
                      ios_file_id= f.read(32)
                      f.close()
-                     f= open("packs/versions/draft_ios_version.txt","r")
+                     f= open(paths['versions']+"draft_ios_version.txt","r")
                      ios_version= f.read(10)
                      f.close()
                      emoji_ios= '\u2705 '
-                     bot.sendDocument(chat_id=update.message.chat_id,
-                         document=ios_file_id)
                 else:
-                     f= open("packs/versions/ios_version.txt","r")
+                     f= open(paths['versions']+"ios_version.txt","r")
                      ios_version= f.read(10)
                      f.close()
                      emoji_ios= '\u274C '
                 if event['tdesktop'] != 'NOT':
-                     f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+                     f= open(paths['file_ids']+"draft_tdesk_file_id.txt","r")
                      tdesk_file_id= f.read(32)
                      f.close()
-                     f= open("packs/versions/draft_tdesk_version.txt","r")
+                     f= open(paths['versions']+"draft_tdesk_version.txt","r")
                      tdesk_version= f.read(10)
                      f.close()
                      emoji_tdesk= '\u2705 '
-                     bot.sendDocument(chat_id=update.message.chat_id,
-                         document=tdesk_file_id)
                 else:
-                     f= open("packs/versions/tdesktop_version.txt","r")
+                     f= open(paths['versions']+"tdesktop_version.txt","r")
                      tdesk_version= f.read(10)
                      f.close()
                      emoji_tdesk= '\u274C '
@@ -967,6 +958,15 @@ class CommandsModule(object):
                          one_time_keyboard=True,
                          resize_keyboard=True
                 ))
+                if event['android'] != 'NOT':
+                      bot.sendDocument(chat_id=update.message.chat_id,
+                            document=and_file_id)
+                if event['ios'] != 'NOT':
+                      bot.sendDocument(chat_id=update.message.chat_id,
+                            document=ios_file_id)
+                if event['tdesktop'] != 'NOT':
+                      bot.sendDocument(chat_id=update.message.chat_id,
+                            document=tdesk_file_id)
 
             elif FIELDS[current_field]['name'] != 'type' or FIELDS[current_field]['name'] != 'month' or FIELDS[current_field]['name'] != 'day' or FIELDS[current_field]['name'] != 'year' or FIELDS[current_field]['name'] != 'hour' or FIELDS[current_field]['name'] != 'minute' or FIELDS[current_field]['name'] != 'date' or FIELDS[current_field]['name'] != 'date_version' or FIELDS[current_field]['name'] != 'validate':
                 bot.sendMessage(
@@ -981,6 +981,13 @@ class CommandsModule(object):
 
     def create_event(self, bot, update, event):
         if event['type'] == 'Paquets de llengua' and event['validate'] == 'No':
+            self.cancel_command(bot, update)
+        elif event['android'] == 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] == 'NOT':
+            bot.sendMessage(
+                 update.message.chat_id,
+                 text="No té sentit generar l'actualització de paquets si no n'heu actualitzat cap. Procediré amb la cancel·lació de l'actualització de paquets.",
+                 reply_markup=ReplyKeyboardHide()
+                 )
             self.cancel_command(bot, update)
         else:
              if event['type'] == 'Paquets de llengua':
@@ -1014,46 +1021,46 @@ class CommandsModule(object):
                  else:
                       monthnum = '12'
                  newdate = day + "/" + monthnum + "/" + year
-                 versiontxt=open('packs/versions/current_version.txt','w')
+                 versiontxt=open(paths['versions']+'current_version.txt','w')
                  versiontxt.write(newdate)
                  versiontxt.close()
                  if event['android'] != 'NOT':
-                      f= open("packs/file_ids/draft_and_file_id.txt","r")
+                      f= open(paths['file_ids']+'draft_and_file_id.txt','r')
                       and_file_id= f.read(32)
                       f.close()
-                      f=open('packs/file_ids/android_file_id.txt','w')
+                      f=open(paths['file_ids']+'android_file_id.txt','w')
                       f.write(and_file_id)
                       f.close()
-                      f= open("packs/versions/draft_and_version.txt","r")
+                      f= open(paths['versions']+'draft_and_version.txt','r')
                       and_version= f.read(10)
                       f.close()
-                      f=open('packs/versions/android_version.txt','w')
+                      f=open(paths['versions']+'android_version.txt','w')
                       f.write(and_version)
                       f.close()
                  if event['ios'] != 'NOT':
-                      f= open("packs/file_ids/draft_ios_file_id.txt","r")
+                      f= open(paths['file_ids']+'draft_ios_file_id.txt','r')
                       ios_file_id= f.read(32)
                       f.close()
-                      f=open('packs/file_ids/ios_file_id.txt','w')
+                      f=open(paths['file_ids']+'ios_file_id.txt','w')
                       f.write(ios_file_id)
                       f.close()
-                      f= open("packs/versions/draft_ios_version.txt","r")
+                      f= open(paths['versions']+'draft_ios_version.txt','r')
                       ios_version= f.read(10)
                       f.close()
-                      f=open('packs/versions/ios_version.txt','w')
+                      f=open(paths['versions']+'ios_version.txt','w')
                       f.write(ios_version)
                       f.close()
                  if event['tdesktop'] != 'NOT':
-                      f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+                      f= open(paths['file_ids']+'draft_tdesk_file_id.txt','r')
                       tdesk_file_id= f.read(32)
                       f.close()
-                      f=open('packs/file_ids/tdesktop_file_id.txt','w')
+                      f=open(paths['file_ids']+'tdesktop_file_id.txt','w')
                       f.write(tdesk_file_id)
                       f.close()
-                      f= open("packs/versions/draft_tdesk_version.txt","r")
+                      f= open(paths['versions']+'draft_tdesk_version.txt','r')
                       tdesk_version= f.read(10)
                       f.close()
-                      f=open('packs/versions/tdesktop_version.txt','w')
+                      f=open(paths['versions']+'tdesktop_version.txt','w')
                       f.write(tdesk_version)
                       f.close()
              self.store.insert_event(event)
