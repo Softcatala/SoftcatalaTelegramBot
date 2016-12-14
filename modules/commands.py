@@ -75,7 +75,7 @@ FIELDS = [
     {
         'name': 'date_version',
         'message': 'Comproveu que la data de la versió és correcta (seguint l\'ordre *dia/mes/any*) i si és així premeu el botó per a desar-la.\n\nPer a cancel·lar el procés envieu /cancel.',
-        'required': False
+        'required': True
     },
     {
         'name': 'android',
@@ -92,6 +92,11 @@ FIELDS = [
         'message': '\u0037\u20E3 Envieu-me el *fitxer del paquet de llengua per a Telegram Desktop*. Assegureu-vos que el fitxer s\'anomena *tdesktop.strings*.\n\nPodeu enviar /skip si no teniu el fitxer del paquet de llengua per a Telegram Desktop actualitzat o /cancel per a cancel·lar el procés d\'actualització dels paquets de llengua.',
         'required': False
     },
+    {
+        'name': 'validate',
+        'message': '\u0038\u20E3 Comproveu que les dades són correctes i que acabeu de rebre els fitxers que heu actualitzat. Si no és així, premeu «No» i cancel·lareu l\'actualització dels paquets',
+        'required': False
+    },
 ]
 
 
@@ -102,11 +107,24 @@ def parse_fields(field, value):
              return error2
         else:
              if field == 'type':
-                 if value == 'Esdeveniment' or value == 'Notícia' or value == 'Paquets de llengua':  
+                 if value == 'Esdeveniment' or value == 'Notícia':  
                       return value
-                 elif value == 'esdeveniment' or value == 'notícia' or value == 'paquets de llengua':
+                 if value == 'Paquets de llengua':
+                      if '"type": "Paquets de llengua"' in open('event_drafts.json').read():
+                           error3= 'error3'
+                           return error3
+                      else:
+                           return value
+                 elif value == 'esdeveniment' or value == 'notícia':
                       valuecap = value.capitalize()  
                       return valuecap
+                 elif value == 'paquets de llengua':
+                      if '"type": "Paquets de llengua"' in open('event_drafts.json').read():
+                           error3= 'error3'
+                           return error3
+                      else:
+                           valuecap = value.capitalize()  
+                           return valuecap
                  else:
                       error = 'error'
                       return error
@@ -184,10 +202,47 @@ def parse_fields(field, value):
                  except:
                       error = 'error'
                       return error
+             if field == 'validate':
+                 if value == 'Sí':
+                      return value
+                 elif value == 'No':
+                      return value
+                 else:
+                      error = 'error'
+                      return error
              return value
-    elif field == 'android' or field == 'ios' or field == 'tdesktop':
-        if value == '':
-             return value
+
+    ### REVIEW!!!!!!!!
+    elif field == 'android':
+        #if value == '':
+             f= open("packs/file_ids/draft_and_file_id.txt","r")
+             and_file_id= f.read(32)
+             f.close()
+             if and_file_id == '--------------------------------':
+                  and_file_id= 'NOT'
+                  return str(and_file_id)
+             else:
+                  return str(and_file_id)
+    elif field == 'ios':
+        #if value == '':
+             f= open("packs/file_ids/draft_ios_file_id.txt","r")
+             ios_file_id= f.read(32)
+             f.close()
+             if ios_file_id == '--------------------------------':
+                  ios_file_id= 'NOT'
+                  return str(ios_file_id)
+             else:
+                  return str(ios_file_id)
+    elif field == 'tdesktop':
+        #if value == '':
+             f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+             tdesk_file_id= f.read(32)
+             f.close()
+             if tdesk_file_id == '--------------------------------':
+                  tdesk_file_id= 'NOT'
+                  return str(tdesk_file_id)
+             else:
+                  return str(tdesk_file_id)
 
 def help_command(bot, update):
     bot.sendMessage(update.message.chat_id, text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
@@ -195,7 +250,7 @@ def help_command(bot, update):
 class CommandsModule(object):
     def __init__(self):
         self.handlers = [
-            CommandHandler('start', self.start_command, pass_args=True),
+            CommandHandler('admin', self.start_command, pass_args=True),
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
@@ -252,6 +307,12 @@ class CommandsModule(object):
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'type' and event['type'] == 'error3':
+                        bot.sendMessage(
+                        update.message.chat_id,
+                        text="\u26A0\uFE0F No es permet que més d'un usuari realitzi aquesta acció al mateix temps... Com és evident, algun dels administradors se us ha avançat.\n\nNo tinc més remei que cancel·lar l'actualització dels paquets."
+                        )
+                        self.cancel_command(bot, update)
             elif field['name'] == 'description' and event['description'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
@@ -335,11 +396,11 @@ class CommandsModule(object):
             elif field['name'] == 'year' and event['type'] == 'Paquets de llengua':
                   current_field += 7
                   self.update_draft(bot, event, user_id, update, current_field)
-            elif field['name'] == 'eventurl' and event['eventurl'] != 'error':
-                  current_field += 6
+            elif field['name'] == 'eventurl' and event['eventurl'] != 'error' and event['eventurl'] != 'error2':
+                  current_field += 7
                   self.update_draft(bot, event, user_id, update, current_field)
-            elif field['name'] == 'newsurl' and event['eventurl'] != 'error':
-                  current_field += 5
+            elif field['name'] == 'newsurl' and event['newsurl'] != 'error' and event['newsurl'] != 'error2':
+                  current_field += 6
                   self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'day' and event['day'] == 'error':
                   bot.sendMessage(
@@ -398,7 +459,16 @@ class CommandsModule(object):
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
-            elif field['name'] == 'android' and event['android'] == '':
+
+            elif field['name'] == 'validate' and event['validate'] == 'error':
+                  bot.sendMessage(
+                  update.message.chat_id,
+                  text="\u26A0\uFE0F No és gaire difícil... «Sí» o «No»."
+                  )
+                  current_field += 0
+                  self.update_draft(bot, event, user_id, update, current_field)
+
+            elif field['name'] == 'android':
                   file_name = update.message.document.file_name
                   file_id = update.message.document.file_id
                   if file_name != 'strings.xml':
@@ -415,9 +485,18 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Android anomenat strings.xml amb l'identificador _" + file_id + "_."
                         )
+                        f=open('packs/file_ids/draft_and_file_id.txt','w')
+                        f.write(file_id)
+                        f.close()
+                        event[field['name']] = parse_fields(field['name'], text)
+                        android_version= event['date_version']
+                        f=open('packs/versions/draft_and_version.txt','w')
+                        f.write(android_version)
+                        f.close()
                         current_field += 1
                         self.update_draft(bot, event, user_id, update, current_field)
-            elif field['name'] == 'ios' and event['ios'] == '':
+
+            elif field['name'] == 'ios':
                   file_name = update.message.document.file_name
                   file_id = update.message.document.file_id
                   if file_name != 'Localizable-ios.strings':
@@ -434,9 +513,18 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a iOS anomenat Localizable-ios.strings amb l'identificador _" + file_id + "_."
                         )
+                        f=open('packs/file_ids/draft_ios_file_id.txt','w')
+                        f.write(file_id)
+                        f.close()
+                        event[field['name']] = parse_fields(field['name'], text)
+                        ios_version= event['date_version']
+                        f=open('packs/versions/draft_ios_version.txt','w')
+                        f.write(ios_version)
+                        f.close()
                         current_field += 1
                         self.update_draft(bot, event, user_id, update, current_field)
-            elif field['name'] == 'tdesktop' and event['tdesktop'] == '':
+
+            elif field['name'] == 'tdesktop':
                   file_name = update.message.document.file_name
                   file_id = update.message.document.file_id
                   if file_name != 'tdesktop.strings':
@@ -453,6 +541,14 @@ class CommandsModule(object):
                         parse_mode='Markdown',
                         text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Telegram Desktop anomenat tdesktop.strings amb l'identificador _" + file_id + "_."
                         )
+                        f=open('packs/file_ids/draft_tdesk_file_id.txt','w')
+                        f.write(file_id)
+                        f.close()
+                        event[field['name']] = parse_fields(field['name'], text)
+                        tdesk_version= event['date_version']
+                        f=open('packs/versions/draft_tdesk_version.txt','w')
+                        f.write(tdesk_version)
+                        f.close()
                         current_field += 1
                         self.update_draft(bot, event, user_id, update, current_field)
 
@@ -497,13 +593,55 @@ class CommandsModule(object):
             if field['required']:
                 bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
                                 text="\u26A0\uFE0F Aquest camp és necessari.\n\n" + field['message'])
+            elif field['name'] == 'android':
+                event = draft['event']
+                android_version= 'Not updated'
+                f=open('packs/versions/draft_and_version.txt','w')
+                f.write(android_version)
+                f.close()
+                file_id= '--------------------------------'
+                f=open('packs/file_ids/draft_and_file_id.txt','w')
+                f.write(file_id)
+                f.close()
+                value= 'null'
+                event[field['name']] = parse_fields(field['name'], value)
+                current_field += 1
+                self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'ios':
+                event = draft['event']
+                ios_version= 'Not updated'
+                f=open('packs/versions/draft_ios_version.txt','w')
+                f.write(ios_version)
+                f.close()
+                file_id= '--------------------------------'
+                f=open('packs/file_ids/draft_ios_file_id.txt','w')
+                f.write(file_id)
+                f.close()
+                value= 'null'
+                event[field['name']] = parse_fields(field['name'], value)
+                current_field += 1
+                self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'tdesktop':
+                event = draft['event']
+                tdesk_version= 'Not updated'
+                f=open('packs/versions/draft_tdesk_version.txt','w')
+                f.write(tdesk_version)
+                f.close()
+                file_id= '--------------------------------'
+                f=open('packs/file_ids/draft_tdesk_file_id.txt','w')
+                f.write(file_id)
+                f.close()
+                value= 'null'
+                event[field['name']] = parse_fields(field['name'], value)
+                current_field += 1
+                self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'eventurl':
                 event = draft['event']
-                current_field += 6
+                current_field += 7
                 self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'newsurl':
                 event = draft['event']
-                current_field += 5
+                current_field += 6
                 self.update_draft(bot, event, user_id, update, current_field)
             else:
                 event = draft['event']
@@ -518,7 +656,6 @@ class CommandsModule(object):
         self.store.update_draft(user_id, event, current_field)
 
         if current_field <= len(FIELDS) - 1:
-
             if FIELDS[current_field]['name'] == 'type':
                 bot.sendMessage(
                     update.message.chat_id,
@@ -773,7 +910,65 @@ class CommandsModule(object):
                          resize_keyboard=True
                 ))
 
-            elif FIELDS[current_field]['name'] != 'type' or FIELDS[current_field]['name'] != 'month' or FIELDS[current_field]['name'] != 'day' or FIELDS[current_field]['name'] != 'year' or FIELDS[current_field]['name'] != 'hour' or FIELDS[current_field]['name'] != 'minute' or FIELDS[current_field]['name'] != 'date' or FIELDS[current_field]['name'] != 'date_version':
+            elif FIELDS[current_field]['name'] == 'validate':
+                if event['android'] != 'NOT':
+                     f= open("packs/file_ids/draft_and_file_id.txt","r")
+                     and_file_id= f.read(32)
+                     f.close()
+                     f= open("packs/versions/draft_and_version.txt","r")
+                     and_version= f.read(10)
+                     f.close()
+                     emoji_and= '\u2705 '
+                     bot.sendDocument(chat_id=update.message.chat_id,
+                         document=and_file_id)
+                else:
+                     f= open("packs/versions/android_version.txt","r")
+                     and_version= f.read(10)
+                     f.close()
+                     emoji_and= '\u274C '
+                if event['ios'] != 'NOT':
+                     f= open("packs/file_ids/draft_ios_file_id.txt","r")
+                     ios_file_id= f.read(32)
+                     f.close()
+                     f= open("packs/versions/draft_ios_version.txt","r")
+                     ios_version= f.read(10)
+                     f.close()
+                     emoji_ios= '\u2705 '
+                     bot.sendDocument(chat_id=update.message.chat_id,
+                         document=ios_file_id)
+                else:
+                     f= open("packs/versions/ios_version.txt","r")
+                     ios_version= f.read(10)
+                     f.close()
+                     emoji_ios= '\u274C '
+                if event['tdesktop'] != 'NOT':
+                     f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+                     tdesk_file_id= f.read(32)
+                     f.close()
+                     f= open("packs/versions/draft_tdesk_version.txt","r")
+                     tdesk_version= f.read(10)
+                     f.close()
+                     emoji_tdesk= '\u2705 '
+                     bot.sendDocument(chat_id=update.message.chat_id,
+                         document=tdesk_file_id)
+                else:
+                     f= open("packs/versions/tdesktop_version.txt","r")
+                     tdesk_version= f.read(10)
+                     f.close()
+                     emoji_tdesk= '\u274C '
+                bot.sendMessage(
+                    update.message.chat_id,
+                    parse_mode='Markdown',
+                    text=FIELDS[current_field]['message'] + '\n\nHeu actualitzat:\n\n' + emoji_and + 'Android: ' + and_version + '\n' + emoji_ios + 'iOS: ' + ios_version + '\n' + emoji_tdesk + 'Telegram Desktop: ' + tdesk_version + '.\n',
+                    reply_markup=ReplyKeyboardMarkup(
+                         keyboard=[
+                              ['Sí','No']
+                         ],
+                         one_time_keyboard=True,
+                         resize_keyboard=True
+                ))
+
+            elif FIELDS[current_field]['name'] != 'type' or FIELDS[current_field]['name'] != 'month' or FIELDS[current_field]['name'] != 'day' or FIELDS[current_field]['name'] != 'year' or FIELDS[current_field]['name'] != 'hour' or FIELDS[current_field]['name'] != 'minute' or FIELDS[current_field]['name'] != 'date' or FIELDS[current_field]['name'] != 'date_version' or FIELDS[current_field]['name'] != 'validate':
                 bot.sendMessage(
                     update.message.chat_id,
                     parse_mode='Markdown',
@@ -785,15 +980,99 @@ class CommandsModule(object):
             self.create_event(bot, update, event)
 
     def create_event(self, bot, update, event):
-        self.store.insert_event(event)
-        self.store.remove_draft(update.message.from_user.id)
+        if event['type'] == 'Paquets de llengua' and event['validate'] == 'No':
+            self.cancel_command(bot, update)
+        else:
+             if event['type'] == 'Paquets de llengua':
+                 if int(event['day']) > 9:
+                      day = event['day']
+                 else:
+                      day = '0' + event['day']
+                 year = event['year']
+                 if event['month'] == 'Gener':
+                      monthnum = '01'
+                 elif event['month'] == 'Febrer':
+                      monthnum = '02'
+                 elif event['month'] == 'Març':
+                      monthnum = '03'
+                 elif event['month'] == 'Abril':
+                      monthnum = '04'
+                 elif event['month'] == 'Maig':
+                      monthnum = '05'
+                 elif event['month'] == 'Juny':
+                      monthnum = '06'
+                 elif event['month'] == 'Juliol':
+                      monthnum = '07'
+                 elif event['month'] == 'Agost':
+                      monthnum = '08'
+                 elif event['month'] == 'Setembre':
+                      monthnum = '09'
+                 elif event['month'] == 'Octubre':
+                      monthnum = '10'
+                 elif event['month'] == 'Novembre':
+                      monthnum = '11'
+                 else:
+                      monthnum = '12'
+                 newdate = day + "/" + monthnum + "/" + year
+                 versiontxt=open('packs/versions/current_version.txt','w')
+                 versiontxt.write(newdate)
+                 versiontxt.close()
+                 if event['android'] != 'NOT':
+                      f= open("packs/file_ids/draft_and_file_id.txt","r")
+                      and_file_id= f.read(32)
+                      f.close()
+                      f=open('packs/file_ids/android_file_id.txt','w')
+                      f.write(and_file_id)
+                      f.close()
+                      f= open("packs/versions/draft_and_version.txt","r")
+                      and_version= f.read(10)
+                      f.close()
+                      f=open('packs/versions/android_version.txt','w')
+                      f.write(and_version)
+                      f.close()
+                 if event['ios'] != 'NOT':
+                      f= open("packs/file_ids/draft_ios_file_id.txt","r")
+                      ios_file_id= f.read(32)
+                      f.close()
+                      f=open('packs/file_ids/ios_file_id.txt','w')
+                      f.write(ios_file_id)
+                      f.close()
+                      f= open("packs/versions/draft_ios_version.txt","r")
+                      ios_version= f.read(10)
+                      f.close()
+                      f=open('packs/versions/ios_version.txt','w')
+                      f.write(ios_version)
+                      f.close()
+                 if event['tdesktop'] != 'NOT':
+                      f= open("packs/file_ids/draft_tdesk_file_id.txt","r")
+                      tdesk_file_id= f.read(32)
+                      f.close()
+                      f=open('packs/file_ids/tdesktop_file_id.txt','w')
+                      f.write(tdesk_file_id)
+                      f.close()
+                      f= open("packs/versions/draft_tdesk_version.txt","r")
+                      tdesk_version= f.read(10)
+                      f.close()
+                      f=open('packs/versions/tdesktop_version.txt','w')
+                      f.write(tdesk_version)
+                      f.close()
+             self.store.insert_event(event)
+             self.store.remove_draft(update.message.from_user.id)
 
-        keyboard = [[InlineKeyboardButton(text="Envia la publicació", switch_inline_query=event['name'])], []]
-        bot.sendMessage(
-            update.message.chat_id,
-            text="S'ha creat la publicació",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
-        )
+             keyboard = [[InlineKeyboardButton(text="Envia la publicació", switch_inline_query=event['name'])], []]
+
+             if event['type'] == 'Paquets de llengua':
+                   bot.sendMessage(
+                       update.message.chat_id,
+                       text="S'ha acabat l'actualització dels paquets de llengua",
+                       reply_markup=ReplyKeyboardHide()
+                       )
+
+             bot.sendMessage(
+                 update.message.chat_id,
+                 text="S'ha creat la publicació",
+                 reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+             )
 
     def get_handlers(self):
         return self.handlers
