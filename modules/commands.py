@@ -283,21 +283,21 @@ class CommandsModule(object):
             if event['name'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar el nom de la publicació en blanc ni enviar un document. Torneu-ho a provar."
+                        text="\u26A0\uFE0F No podeu deixar el nom de la publicació en blanc ni enviar un document. Torneu a provar-ho."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'type' and event['type'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar el tipus de publicació en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar el tipus de publicació en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'type' and event['type'] == 'error':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No és un tipus de publicació vàlid, escriviu-lo amb lletres i en català i torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No és un tipus de publicació vàlid, escriviu-lo amb lletres i en català i torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -310,7 +310,7 @@ class CommandsModule(object):
             elif field['name'] == 'description' and event['description'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar la descripció en blanc ni enviar un document. Torneu-ho a provar."
+                        text="\u26A0\uFE0F No podeu deixar la descripció en blanc ni enviar un document. Torneu a provar-ho."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -320,35 +320,35 @@ class CommandsModule(object):
             elif field['name'] == 'month' and event['month'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar el mes en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar el mes en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'day' and event['day'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar el dia en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar el dia en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'year' and event['year'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar l'any en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar l'any en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'hour' and event['hour'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar l'hora en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar l'hora en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'minute' and event['minute'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar els minuts en blanc ni enviar un document. Torneu-ho a provar, amb els botons ho teniu fàcil \U0001F609."
+                        text="\u26A0\uFE0F No podeu deixar els minuts en blanc ni enviar un document. Torneu a provar-ho, amb els botons ho teniu fàcil \U0001F609."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -362,21 +362,21 @@ class CommandsModule(object):
             elif field['name'] == 'place' and event['place'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar el lloc de l'esdeveniment en blanc ni enviar un document. Torneu-ho a provar."
+                        text="\u26A0\uFE0F No podeu deixar el lloc de l'esdeveniment en blanc ni enviar un document. Torneu a provar-ho."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'eventurl' and event['eventurl'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar l'URL de l'esdeveniment en blanc ni enviar un document. Torneu-ho a provar."
+                        text="\u26A0\uFE0F No podeu deixar l'URL de l'esdeveniment en blanc ni enviar un document. Torneu a provar-ho."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'newsurl' and event['newsurl'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
-                        text="\u26A0\uFE0F No podeu deixar l'URL de la notícia en blanc ni enviar un document. Torneu-ho a provar."
+                        text="\u26A0\uFE0F No podeu deixar l'URL de la notícia en blanc ni enviar un document. Torneu a provar-ho."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -399,7 +399,7 @@ class CommandsModule(object):
             elif field['name'] == 'day' and event['day'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F No és un dia vàlid, assegureu-vos què és un nombre entre 1 i 31 i torneu-ho a provar."
+                  text="\u26A0\uFE0F No és un dia vàlid, assegureu-vos què és un nombre entre 1 i 31 i torneu a provar-ho."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -407,7 +407,7 @@ class CommandsModule(object):
             elif field['name'] == 'month' and event['month'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F No és un mes vàlid, escriviu-lo amb lletres i en català i torneu-ho a provar."
+                  text="\u26A0\uFE0F No és un mes vàlid, escriviu-lo amb lletres i en català i torneu a provar-ho."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -417,7 +417,7 @@ class CommandsModule(object):
                   actualyear = int(actualdate.year)
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F No és un any vàlid, heu d'escriure " + str(actualyear) + ", o algun dels anys que apareixen als botons, i torneu-ho a provar."
+                  text="\u26A0\uFE0F No és un any vàlid, heu d'escriure " + str(actualyear) + ", o algun dels anys que apareixen als botons, i torneu a provar-ho."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -425,7 +425,7 @@ class CommandsModule(object):
             elif field['name'] == 'hour' and event['hour'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F No és una hora vàlida, assegureu-vos que és un nombre entre 0 i 23 i torneu-ho a provar."
+                  text="\u26A0\uFE0F No és una hora vàlida, assegureu-vos que és un nombre entre 0 i 23 i torneu a provar-ho."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -433,7 +433,7 @@ class CommandsModule(object):
             elif field['name'] == 'minute' and event['minute'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F No és un minut vàlid, assegureu-vos què és un nombre entre 0 i 59 i torneu-ho a provar."
+                  text="\u26A0\uFE0F No és un minut vàlid, assegureu-vos què és un nombre entre 0 i 59 i torneu a provar-ho."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -441,7 +441,7 @@ class CommandsModule(object):
             elif field['name'] == 'eventurl' and event['eventurl'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F Sembla que l'URL per a l\'esdeveniment que heu enviat no és vàlid, comproveu-lo i torneu-lo a enviar."
+                  text="\u26A0\uFE0F Sembla que l'URL per a l\'esdeveniment que heu enviat no és vàlid, comproveu-lo i torneu a enviar-lo."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -449,7 +449,7 @@ class CommandsModule(object):
             elif field['name'] == 'newsurl' and event['newsurl'] == 'error':
                   bot.sendMessage(
                   update.message.chat_id,
-                  text="\u26A0\uFE0F Sembla que l'URL per a la notícia que heu enviat no és vàlid, comproveu-lo i torneu-lo a enviar."
+                  text="\u26A0\uFE0F Sembla que l'URL per a la notícia que heu enviat no és vàlid, comproveu-lo i torneu a enviar-lo."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -469,7 +469,7 @@ class CommandsModule(object):
                         bot.sendMessage(
                         update.message.chat_id,
                         parse_mode='Markdown',
-                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a Android que *no s'anomena strings.xml*. Comproveu que el fitxer és correcte i torneu-lo a enviar."
+                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a Android que *no s'anomena strings.xml*. Comproveu que el fitxer és correcte i torneu a enviar-lo."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -497,7 +497,7 @@ class CommandsModule(object):
                         bot.sendMessage(
                         update.message.chat_id,
                         parse_mode='Markdown',
-                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a iOS que *no s'anomena Localizable-ios.strings*. Comproveu que el fitxer és correcte i torneu-lo a enviar."
+                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a iOS que *no s'anomena Localizable-ios.strings*. Comproveu que el fitxer és correcte i torneu a enviar-lo."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -525,7 +525,7 @@ class CommandsModule(object):
                         bot.sendMessage(
                         update.message.chat_id,
                         parse_mode='Markdown',
-                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a Telegram Desktop que *no s'anomena tdesktop.strings*. Comproveu que el fitxer és correcte i torneu-lo a enviar."
+                        text="\u26A0\uFE0F Heu enviat un fitxer de paquet de llengua per a Telegram Desktop que *no s'anomena tdesktop.strings*. Comproveu que el fitxer és correcte i torneu a enviar-lo."
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
@@ -657,7 +657,7 @@ class CommandsModule(object):
                     text=FIELDS[current_field]['message'],
                     reply_markup=ReplyKeyboardMarkup(
                          keyboard=[
-                              ['Notícia'], ['Esdeveniment'],['Paquets de llengua']
+                              ['Notícia'],['Esdeveniment'],['Paquets de llengua']
                          ],
                          one_time_keyboard=True,
                          resize_keyboard=True
