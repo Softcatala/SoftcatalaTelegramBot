@@ -14,7 +14,7 @@ from config import allowed_users, paths
 class LangpackModule(object):
     def __init__(self):
         self.handlers2 = [
-            CommandHandler('start', self.download_command),
+            CommandHandler('start', self.download_command, pass_args=True),
             CommandHandler('baixa', self.download_command),
             CommandHandler('android', self.android_command),
             CommandHandler('ios', self.ios_command),
@@ -46,9 +46,15 @@ class LangpackModule(object):
         f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
         ftdesktop= f.read(32)
         f.close()
-        query = update.callback_query
-        platform_name= query.data
-        if platform_name == 'Android':
+	
+	if update.callback_query:	#SI LA FUNCIÓ LA TRIGA UN BOTÓ INTEGRAT (ÉS A DIR, SI EXISTEIX UN CALLBACK_QUERY).
+            query = update.callback_query
+            platform_name = query.data	
+        else:					   #SI LA FUNCIÓ LA TRIGA L'ORDRE «/start argument» (ÉS A DIR, SI NO EXISTEIX UN CALLBACK_QUERY).
+            query = update.message
+	    platform_name = query.text       #ACÍ HI HAURA QUE VEURE LA FORMA DE TRAURE-LI EL «/start» AL message.text.		
+
+	if platform_name == 'Android':
               filepack= fandroid
               textpack= tandroid
         elif platform_name == 'iOS':
@@ -97,21 +103,28 @@ class LangpackModule(object):
         #callback_id = query.get('callback_query', {}).get('id')
         #self.telegram_api.answerCallbackQuery(callback_id)
         callback_query_id=query.id
-        self.bot.answerCallBackQuery(callback_query_id, text="")
+        bot.answerCallbackQuery(callback_query_id=query.id, text="ESTÀS FET UN MATXOTE!!!!")    #PROVA DEL ANSWER_CALLBACK_QUERY
 
-    def download_command(self, bot, update):
+    def download_command(self, bot, update, args):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
-            keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
+            if len(args) == 0:		#SI NO HI HA CAP ARGUMENT, ÉS A DIR, SI L'ORDRE ÉS NOMES «/start».
+                keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
                          InlineKeyboardButton("iOS", callback_data='iOS'),
 		         InlineKeyboardButton("TDesktop", callback_data='tdesktop')]]
 
-            bot.sendMessage(update.message.chat_id,
+                bot.sendMessage(update.message.chat_id,
                             parse_mode='Markdown',
                             text= "Hola, sóc el *Robot de Softcatalà*! La meva funció és proporcionar els paquets de llengua per a les diferents aplicacions del Telegram que els admeten.\nTrieu el sistema operatiu que esteu utilitzant per baixar el paquet de llengua adequat:",
                             reply_markup = InlineKeyboardMarkup(keyboard)
-            )   
-
+                )
+            elif len(args) == 1:	#SI HI HA 1 ARGUMENT, ÉS A DIR, SI L'ORDRE ÉS «/start argument»
+		platform_handler(self, bot, update)	#CRIDA A LA FUNCIÓ QUE ENVIA ELS PAQUETS. NO SÉ SI ELS ARGUMENTS ESTAN BEN DEFINITS.
+	    else:    #SI HI HA MÉS D'UN ARGUMENT.
+		bot.sendMessage(update.message.chat_id,
+			    parse_mode='Markdown',
+			    text= "Ho lamente, aquesta ordre només accepta 1 paràmetre. Proveu a enviar només /start."
+	        )
         else:
             f_name = update.message.from_user.first_name
             bot.sendMessage(update.message.chat_id,
