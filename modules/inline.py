@@ -11,6 +11,7 @@ from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
 
+from config import paths
 
 
 def create_event_payload(event):
@@ -77,6 +78,49 @@ def create_keyboard(event, user):
 
           return [buttons, []]
 
+    if event.get('type') and event['type'] == 'Paquets de llengua':
+          if event.get('android') and event['android'] == 'NOT':
+               f= open(paths['versions']+"android_version.txt","r")
+               android_date= f.read(10)
+               f.close()
+               old_and= ' (' + android_date + ')'
+          else:
+               old_and= ''
+          if event.get('ios') and event['ios'] == 'NOT':
+               f= open(paths['versions']+"ios_version.txt","r")
+               ios_date= f.read(10)
+               f.close()
+               old_ios= ' (' + ios_date + ')'
+          else:
+               old_ios= ''
+          if event.get('tdesktop') and event['tdesktop'] == 'NOT':
+               f= open(paths['versions']+"tdesktop_version.txt","r")
+               tdeskop_date= f.read(10)
+               f.close()
+               old_tdesk= ' (' + tdesktop_date + ')'
+          else:
+               old_tdesk= ''
+          button1 = [
+              InlineKeyboardButton(
+                  text="Android" + old_and,
+                  url='http://telegram.me/Softcatalabot?start=android'
+              )
+          ]
+          button2 = [
+              InlineKeyboardButton(
+                  text="iOS" + old_ios,
+                  url='http://telegram.me/Softcatalabot?start=ios'
+              )
+          ]
+          button3 = [
+              InlineKeyboardButton(
+                  text="TDesktop" + old_tdesk,
+                  url='http://telegram.me/Softcatalabot?start=tdesktop'
+              )
+          ]
+
+          return [button1, button2, button3, []]
+
 
 def format_date(param):
     locale.setlocale(locale.LC_TIME, "ca_ES.utf8")
@@ -128,6 +172,63 @@ def create_event_message(event, user):
          #    for u in event['users']:
          #        message_text += u['first_name']
          #        message_text += str(u['like']) + '\n'
+
+          message_text += '\n'
+
+          return message_text
+
+    if 'type' in event and event['type'] == 'Paquets de llengua':
+          f= open(paths['versions']+"android_version.txt","r")
+          android_date= f.read(10)
+          f.close()
+          f= open(paths['versions']+"ios_version.txt","r")
+          ios_date= f.read(10)
+          f.close()
+          f= open(paths['versions']+"tdesktop_version.txt","r")
+          tdeskop_date= f.read(10)
+          f.close()
+          message_text = "*{name}*\n".format(
+              name=event['name']
+          )
+          if event['android'] != 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] != 'NOT':
+                pack= 'els paquets'
+                updated_packs= 'les aplicacions d\'Android, iOS i Telegram Desktop'
+          elif event['android'] != 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] == 'NOT':
+                pack= 'els paquets'
+                updated_packs= 'les aplicacions d\'Android i iOS'
+                not_pack= 'del paquet'
+                not_updated_packs= 'Telegram Desktop (' + tdesk_date + ')'
+          elif event['android'] != 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] != 'NOT':
+                pack= 'els paquets'
+                updated_packs= 'les aplicacions d\'Android i Telegram Desktop'
+                not_pack= 'del paquet'
+                not_updated_packs= 'iOS (' + ios_date + ')'
+          elif event['android'] == 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] != 'NOT':
+                pack= 'els paquets'
+                updated_packs= 'les aplicacions d\'iOS i Telegram Desktop'
+                not_pack= 'del paquet'
+                not_updated_packs= 'Android (' + android_date + ')'
+          elif event['android'] != 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] == 'NOT':
+                pack= 'el paquet'
+                updated_packs= 'l\'aplicació d\'Android'
+                not_pack= 'dels paquets'
+                not_updated_packs= 'iOS (' + ios_date + ') i Telegram Desktop (' + tdesktop_date + ')'
+          elif event['android'] == 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] == 'NOT':
+                pack= 'el paquet'
+                updated_packs= 'l\'aplicació d\'iOS'
+                not_pack= 'dels paquets'
+                not_updated_packs= 'Android (' + android_date + ') i Telegram Desktop (' + tdesktop_date + ')'
+          elif event['android'] == 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] != 'NOT':
+                pack= 'el paquet'
+                updated_packs= 'l\'aplicació Telegram Desktop'
+                not_pack= 'dels paquets'
+                not_updated_packs= 'Android (' + android_date + ') i iOS (' + ios_date + ')'
+          message_text += '\nBon dia!\n'
+          message_text += 'Amb data ' + event['date_version'] + ' hem actualitzat ' + pack + ' de llengua del Telegram per a ' + updated_packs + '.\n'
+          if event['android'] == 'NOT' or event['ios'] == 'NOT' or event['tdesktop'] == 'NOT':
+              message_text += 'També teniu disponible una versió més antiga ' + not_pack + ' de llengua per a ' + not_updated_packs + '.\n\n' 
+          if 'description' in event:
+              message_text += event['description']
 
           message_text += '\n'
 
