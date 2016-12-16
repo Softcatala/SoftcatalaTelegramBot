@@ -187,9 +187,9 @@ def create_event_message(event, user):
           f= open(paths['versions']+"tdesktop_version.txt","r")
           tdeskop_date= f.read(10)
           f.close()
-          message_text = "*{name}*\n".format(
-              name=event['name']
-          )
+          #message_text = "*{name}*\n".format(
+          #    name=event['name']
+          #)
           if event['android'] != 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] != 'NOT':
                 pack= 'els paquets'
                 updated_packs= 'les aplicacions d\'Android, iOS i Telegram Desktop'
@@ -223,8 +223,8 @@ def create_event_message(event, user):
                 updated_packs= 'l\'aplicació Telegram Desktop'
                 not_pack= 'dels paquets'
                 not_updated_packs= 'Android (' + android_date + ') i iOS (' + ios_date + ')'
-          message_text += '\nBon dia!\n'
-          message_text += 'Amb data ' + event['date_version'] + ' hem actualitzat ' + pack + ' de llengua del Telegram per a ' + updated_packs + '.\n'
+          message_text = '\nBon dia!\n'
+          message_text += 'Hem actualitzat ' + pack + ' de llengua del Telegram, amb data del ' + event['date_version'] + ', per a ' + updated_packs + '.\n'
           if event['android'] == 'NOT' or event['ios'] == 'NOT' or event['tdesktop'] == 'NOT':
               message_text += 'També teniu disponible una versió més antiga ' + not_pack + ' de llengua per a ' + not_updated_packs + '.\n\n' 
           if 'description' in event:
