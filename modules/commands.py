@@ -247,7 +247,8 @@ def help_command(bot, update):
 class CommandsModule(object):
     def __init__(self):
         self.handlers = [
-            CommandHandler('admin', self.start_command, pass_args=True),
+            CommandHandler('post', self.start_command, pass_args=True),
+            CommandHandler('admin', self.admin_command),
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
@@ -261,6 +262,18 @@ class CommandsModule(object):
             self.store.new_draft(user_id)
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
                         text="Crearem una publicació per a compartir.\n\n\u0031\u20E3 El primer que heu de fer és enviar-me el *nom de la publicació*.\n\nSi no voleu continuar amb el procés, envieu /cancel.",
+                        reply_markup=ReplyKeyboardHide())
+        else:
+            f_name = update.message.from_user.first_name
+            bot.sendMessage(update.message.chat_id,
+                        parse_mode='Markdown',
+                        text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+
+    def admin_command(self, bot, update):
+        user_id = update.message.from_user.id
+        if str(user_id) in allowed_users.values():
+            bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
+                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n\nI per ara ja està",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name
