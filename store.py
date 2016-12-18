@@ -6,6 +6,7 @@ class TinyDBStore(object):
     def __init__(self):
         self.drafts_db = TinyDB(paths['posts']+'event_drafts.json')
         self.events_db = TinyDB(paths['posts']+'events.json')
+        self.packs_db = TinyDB(paths['posts']+'packs.json')
 
     # Drafts
     def contains_draft(self, user_id):
@@ -53,3 +54,17 @@ class TinyDBStore(object):
 
     def get_event(self, event_id):
         return self.events_db.get(eid=int(event_id))
+
+    # Packs
+    def insert_pack(self, pack):
+        pack_id = self.packs_db.insert(pack)
+        pack['id'] = pack_id
+        return pack
+
+    def get_packs(self, what):
+        #if name:
+        #    return self.packs_db.search((Query().what == 'pack') & (Query().name.test(lambda v: name in v)))
+        return self.packs_db.search(Query().what == "pack")
+
+    def get_pack(self, pack_id):
+        return self.packs_db.get(eid=int(pack_id))

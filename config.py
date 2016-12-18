@@ -15,3 +15,8 @@ paths={
     'file_ids': 'data/file_ids/',
     'posts': 'data/posts/'
 }
+
+chats={
+    'group': 'GROUP_ID',
+    'channel': 'CHANNEL_ID'
+}
