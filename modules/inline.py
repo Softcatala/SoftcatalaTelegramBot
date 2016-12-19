@@ -3,6 +3,7 @@ import base64
 import datetime
 import locale
 import json
+import csv
 from six.moves import urllib
 
 from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ParseMode, \
@@ -11,7 +12,7 @@ from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
 
-from config import allowed_users, paths
+from config import allowed_users, paths, inline_status
 
 
 def create_event_payload(event):
@@ -351,55 +352,61 @@ class InlineModule(object):
         user = update.inline_query.from_user.__dict__
 
         if str(user_id) in allowed_users.values():
-             results = []
-             events = self.store.get_events(user_id, query)
+          with open(paths['inline']+'inline_status.csv', 'rt') as f:
+            reader = csv.reader(f, delimiter=',')
+            for row in reader:
+              for field in row:
+                if field == str(user_id) + '_admin':
+                  results = []
+                  events = self.store.get_events(user_id, query)
 
-             for event in events:
-                 keyboard = create_keyboard(event, user)
-                 result = InlineQueryResultArticle(id=event.eid,
-                                                   title=event['name'],
-                                                   description=event['description'],
-                                                   thumb_url='https://gent.softcatala.org/albert/softcatalabot/softcatalabot_calendar.png',
-                                                   input_message_content=InputTextMessageContent(
-                                                       create_event_message(event, user),
-                                                       parse_mode=ParseMode.MARKDOWN,
-						       disable_web_page_preview=True
-                                                   ),
-                                                   reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
-                 results.append(result)
+                  for event in events:
+                      keyboard = create_keyboard(event, user)
+                      result = InlineQueryResultArticle(id=event.eid,
+                                                        title=event['name'],
+                                                        description=event['description'],
+                                                        thumb_url='https://gent.softcatala.org/albert/softcatalabot/softcatalabot_calendar.png',
+                                                        input_message_content=InputTextMessageContent(
+                                                            create_event_message(event, user),
+                                                            parse_mode=ParseMode.MARKDOWN,
+						            disable_web_page_preview=True
+                                                        ),
+                                                        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
+                      results.append(result)
 
-             bot.answerInlineQuery(
-                 update.inline_query.id,
-                 results=results,
-                 switch_pm_text='Crea una publicació nova...',
-                 switch_pm_parameter='new',
-                 is_personal=True
-             )
+                  bot.answerInlineQuery(
+                      update.inline_query.id,
+                      results=results,
+                      switch_pm_text='Canvia l\'estatus per a l\'inline...',
+                      switch_pm_parameter='change-inline-status',
+                      is_personal=True
+                  )
 
-        else:
-             results = []
-             packs = self.store.get_packs(query)
+        #elif str(user_id) in allowed_users.values() and inline_status[str(user_id)] == 'normal':
+                elif field == str(user_id) + '_normal':
+                  results = []
+                  packs = self.store.get_packs(query)
 
-             for pack in packs:
-                 #keyboard = create_keyboard(event, user)
-                 result = InlineQueryResultCachedDocument(id=pack.eid,
-                                                          type='document',
-                                                          title=pack['name'],
-                                                          document_file_id=pack['id'],
-                                                          description=pack['description'],
-                                                          input_message_content=InputTextMessageContent(pack['message'],
-                                                                parse_mode=ParseMode.MARKDOWN,
-						                disable_web_page_preview=False)
-                                                          )
-                 results.append(result)
+                  for pack in packs:
+                      #keyboard = create_keyboard(event, user)
+                      result = InlineQueryResultCachedDocument(id=pack.eid,
+                                                               type='document',
+                                                               title=pack['name'],
+                                                               document_file_id=pack['cached_id'],
+                                                               description=pack['description'],
+                                                               input_message_content=InputTextMessageContent(pack['message'],
+                                                                     parse_mode=ParseMode.MARKDOWN,
+						                     disable_web_page_preview=False)
+                                                               )
+                      results.append(result)
 
-             bot.answerInlineQuery(
-                 update.inline_query.id,
-                 results=results,
-                 switch_pm_text='Vés al bot de Softcatalà...',
-                 switch_pm_parameter='new',
-                 is_personal=True
-             )
+                  bot.answerInlineQuery(
+                      update.inline_query.id,
+                      results=results,
+                      switch_pm_text='Canvia l\'estatus per a l\'inline...',
+                      switch_pm_parameter='change-inline-status',
+                      is_personal=True
+                  )
 
     def get_handlers(self):
         return self.handlers

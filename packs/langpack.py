@@ -8,7 +8,7 @@ from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler
 
-from config import allowed_users, paths
+from config import allowed_users, paths, inline_status
 
 
 class LangpackModule(object):
@@ -341,6 +341,32 @@ class LangpackModule(object):
                       with open(paths['stats']+'stats.csv','a',newline='') as f:
                           writer=csv.writer(f)
                           writer.writerow([stat])
+            #CHANGE INLINE STATUS
+            elif len(args) == 1 and args[0] == 'change-inline-status':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                    with open(paths['inline']+'inline_status.csv', 'rt') as f:
+                      reader = csv.reader(f, delimiter=',')
+                      for row in reader:
+                        for field in row:
+                          if field == str(user_id) + '_admin':
+                            status = {str(user_id): 'normal'}
+                            inline_status.update(status)
+                            with open(paths['inline']+'inline_status.csv', 'w') as f:
+                                 [f.write('{0}_{1}\n'.format(key, value)) for key, value in inline_status.items()]
+                            bot.sendMessage(update.message.chat_id,
+			           parse_mode='Markdown',
+			           text= "Ara sou un usuari *normal* per a les consultes _inline_."
+	                    )
+                          elif field == str(user_id) + '_normal':
+                            status = {str(user_id): 'admin'}
+                            inline_status.update(status)
+                            with open(paths['inline']+'inline_status.csv', 'w') as f:
+                                 [f.write('{0}_{1}\n'.format(key, value)) for key, value in inline_status.items()]
+                            bot.sendMessage(update.message.chat_id,
+			           parse_mode='Markdown',
+			           text= "Ara sou un usuari *administrador* per a les consultes _inline_."
+	                    )
             else:
                 bot.sendMessage(update.message.chat_id,
 			    parse_mode='Markdown',
