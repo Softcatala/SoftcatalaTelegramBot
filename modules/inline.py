@@ -387,22 +387,23 @@ class InlineModule(object):
                   results = []
                   packs = self.store.get_packs(query)
 
-                  for pack in packs:
+                  for pack in packs: 
                       #keyboard = create_keyboard(event, user)
                       result = InlineQueryResultCachedDocument(id=pack.eid,
-                                                               type='document',
                                                                title=pack['name'],
                                                                document_file_id=pack['cached_id'],
-                                                               description=pack['description'],
-                                                               input_message_content=InputTextMessageContent(pack['message'],
-                                                                     parse_mode=ParseMode.MARKDOWN,
-						                     disable_web_page_preview=False)
+                                                               description=pack['description']
+                                                               #input_message_content=InputTextMessageContent(
+                                                               #      pack['message'],
+                                                               #      parse_mode=ParseMode.MARKDOWN,
+						               #      disable_web_page_preview=True)
                                                                )
                       results.append(result)
 
                   bot.answerInlineQuery(
                       update.inline_query.id,
                       results=results,
+                      cache_time=30,
                       switch_pm_text='Canvia l\'estatus per a l\'inline...',
                       switch_pm_parameter='change-inline-status',
                       is_personal=True

@@ -2,13 +2,18 @@
 
 import time
 import csv
+
+from requests import get
+import requests
+import json
+
 from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler
 
-from config import allowed_users, paths, inline_status
+from config import params, allowed_users, paths, inline_status
 
 
 class LangpackModule(object):
@@ -20,6 +25,7 @@ class LangpackModule(object):
             CommandHandler('ios', self.ios_command),
             CommandHandler('tdesktop', self.tdesktop_command),
             CommandHandler('stats', self.stats_command),
+            CommandHandler('download', self.test_command),
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
@@ -105,6 +111,29 @@ class LangpackModule(object):
 
         callback_query_id=query.id
         bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
+
+    def test_command(self, bot, update):
+        user_id = update.message.from_user.id
+        if str(user_id) in allowed_users.values():
+            f= open(paths['file_ids']+"android_file_id.txt","r")
+            fandroid= f.read(32)
+            f.close()
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+            output= r.json()
+            file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+            received= paths['local_packs'] + 'strings.xml'
+            with open(received, "wb") as file:
+                response = get(file_url)
+                file.write(response.content)
+            bot.sendMessage(update.message.chat_id,
+                    disable_web_page_preview=True,
+                    text= output
+            )
+            bot.sendMessage(update.message.chat_id,
+                    disable_web_page_preview=True,
+                    parse_mode='Markdown',
+                    text= 'El path és *' + output['result']['file_path'] + '*.'
+            )
 
     def download_command(self, bot, update, args):
         user_id = update.message.from_user.id

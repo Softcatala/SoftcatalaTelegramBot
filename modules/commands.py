@@ -286,7 +286,7 @@ class CommandsModule(object):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
-                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n\nI per ara ja està",
+                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n/download\n/hello\n\nI per ara ja està",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name

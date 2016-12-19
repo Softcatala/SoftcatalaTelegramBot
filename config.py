@@ -13,10 +13,19 @@ paths={
     'stats': 'data/stats/',
     'versions': 'data/versions/',
     'file_ids': 'data/file_ids/',
-    'posts': 'data/posts/'
+    'local_packs': 'data/packs/',
+    'posts': 'data/posts/',
+    'inline': 'data/status/'
 }
 
 chats={
     'group': 'GROUP_ID',
     'channel': 'CHANNEL_ID'
 }
+
+inline_status={
+    'USER_ID': 'admin',
+    'USER_ID': 'admin',
+    ...
+}
+
