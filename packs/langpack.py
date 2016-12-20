@@ -2,24 +2,30 @@
 
 import time
 import csv
+
+from requests import get
+import requests
+import json
+
 from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler
 
-from config import allowed_users, paths
+from config import params, allowed_users, paths, inline_status
 
 
 class LangpackModule(object):
     def __init__(self):
         self.handlers2 = [
             CommandHandler('start', self.download_command, pass_args=True),
-            CommandHandler('baixa', self.download_command),
+            CommandHandler('baixa', self.download_command, pass_args=True),
             CommandHandler('android', self.android_command),
             CommandHandler('ios', self.ios_command),
             CommandHandler('tdesktop', self.tdesktop_command),
             CommandHandler('stats', self.stats_command),
+            CommandHandler('getfiles', self.getfiles_command),
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
@@ -106,6 +112,47 @@ class LangpackModule(object):
         callback_query_id=query.id
         bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
 
+    def getfiles_command(self, bot, update):
+        user_id = update.message.from_user.id
+        if str(user_id) in allowed_users.values():
+            bot.sendMessage(update.message.chat_id,
+                            parse_mode='Markdown',
+                            text= "Us envio els fitxers desats al servidor (còpia de seguretat) per a cada plataforma. Veureu que hi ha la versió normal i la versió desada amb la data (els dos fitxers han de ser iguals)."
+            )
+            #SEND LOCAL ANDROID FILES
+            f= open(paths['versions']+"android_version.txt","r")
+            and_version= f.read(10)
+            f.close()
+            and_version2= str.replace(and_version, "/", "-")
+            android_file= open(paths['local_packs']+'strings.xml', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=android_file)
+            android_file_v= open(paths['local_packs']+'strings-' +and_version2+ '.xml', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=android_file_v)
+            #SEND LOCAL IOS FILES
+            f= open(paths['versions']+"ios_version.txt","r")
+            ios_version= f.read(10)
+            f.close()
+            ios_version2= str.replace(ios_version, "/", "-")
+            ios_file= open(paths['local_packs']+'Localizable-ios.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=ios_file)
+            ios_file_v= open(paths['local_packs']+'Localizable-ios-' +and_version2+ '.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=ios_file_v)
+            #SEND LOCAL TELEGRAM DESKTOP FILES
+            f= open(paths['versions']+"tdesktop_version.txt","r")
+            tdesk_version= f.read(10)
+            f.close()
+            tdesk_version2= str.replace(tdesk_version, "/", "-")
+            tdesktop_file= open(paths['local_packs']+'tdesktop.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=tdesktop_file)
+            tdesktop_file_v= open(paths['local_packs']+'tdesktop-' +tdesk_version2+ '.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=tdesktop_file_v) 
+
     def download_command(self, bot, update, args):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
@@ -119,7 +166,7 @@ class LangpackModule(object):
                             text= "Hola, sóc el *Robot de Softcatalà*! La meva funció és proporcionar els paquets de llengua per a les diferents aplicacions del Telegram que els admeten.\nTrieu el sistema operatiu que esteu utilitzant per baixar el paquet de llengua adequat:",
                             reply_markup = InlineKeyboardMarkup(keyboard)
                 )
-            elif len(args) == 1 and args[0] == 'android':
+            elif len(args) == 1 and args[0] == 'android-rebost':
                   user_id = update.message.from_user.id
                   if str(user_id) in allowed_users.values():
                       f= open(paths['versions']+"android_version.txt","r")
@@ -156,7 +203,7 @@ class LangpackModule(object):
                       with open(paths['stats']+'stats.csv','a',newline='') as f:
                           writer=csv.writer(f)
                           writer.writerow([stat])
-            elif len(args) == 1 and args[0] == 'ios':
+            elif len(args) == 1 and args[0] == 'ios-rebost':
                   user_id = update.message.from_user.id
                   if str(user_id) in allowed_users.values():
                       f= open(paths['versions']+"ios_version.txt","r")
@@ -193,7 +240,7 @@ class LangpackModule(object):
                       with open(paths['stats']+'stats.csv','a',newline='') as f:
                           writer=csv.writer(f)
                           writer.writerow([stat])
-            elif len(args) == 1 and args[0] == 'tdesktop':
+            elif len(args) == 1 and args[0] == 'tdesktop-rebost':
                   user_id = update.message.from_user.id
                   if str(user_id) in allowed_users.values():
                       f= open(paths['versions']+"tdesktop_version.txt","r")
@@ -230,6 +277,143 @@ class LangpackModule(object):
                       with open(paths['stats']+'stats.csv','a',newline='') as f:
                           writer=csv.writer(f)
                           writer.writerow([stat])
+            elif len(args) == 1 and args[0] == 'android-channel':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                      f= open(paths['versions']+"android_version.txt","r")
+                      and_version= f.read(10)
+                      f.close()
+                      tandroid= "Heu triat el paquet de llengua per a *Telegram Android*.\n\nUs enviem la versió " + str(and_version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «strings.xml» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Feu clic al símbol ⋮ per a obrir el *menú d'opcions*.\n3r. Trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n4t. Trieu l'opció «Català».\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+                      f= open(paths['file_ids']+"android_file_id.txt","r")
+                      fandroid= f.read(32)
+                      f.close()
+                      bot.sendMessage(update.message.chat_id,
+                                      parse_mode='Markdown',
+                                      disable_web_page_preview=True,
+                                      text= tandroid
+                      )
+                      bot.sendDocument(update.message.chat_id,
+                                       document=fandroid)
+
+                      user_id = update.message.from_user.id
+                      today= datetime.now()
+                      dayraw = today.day
+                      if int(dayraw) < 10:
+                          day = '0' + str(dayraw)
+                      else:
+                          day = str(dayraw)
+                      monthraw = today.month
+                      if int(monthraw) < 10:
+                          month = '0' + str(monthraw)
+                      else:
+                          month = str(monthraw)
+                      year = today.year
+                      today2= day + '/' + month + '/' + str(year)
+
+                      stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';Android;channel;buttons'
+                      with open(paths['stats']+'stats.csv','a',newline='') as f:
+                          writer=csv.writer(f)
+                          writer.writerow([stat])
+            elif len(args) == 1 and args[0] == 'ios-channel':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                      f= open(paths['versions']+"ios_version.txt","r")
+                      ios_version= f.read(10)
+                      f.close()
+                      tios= "Heu triat el paquet de llengua per a *Telegram iOS*.\n\nUs enviem la versió " + str(ios_version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Instruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «Localizable-ios.strings» enviat després d'aquest missatge prement la icona de la fletxa cap avall.\n2n. Premeu sobre el fitxer baixat i trieu «Apply localization file», «Aplicar traducción» o «Aplica el paquet de llengua», segons el cas.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+                      f= open(paths['file_ids']+"ios_file_id.txt","r")
+                      fios= f.read(32)
+                      f.close()
+                      bot.sendMessage(update.message.chat_id,
+                                      parse_mode='Markdown',
+                                      disable_web_page_preview=True,
+                                      text= tios
+                      )
+                      bot.sendDocument(update.message.chat_id,
+                                       document=fios)
+
+                      user_id = update.message.from_user.id
+                      today= datetime.now()
+                      dayraw = today.day
+                      if int(dayraw) < 10:
+                          day = '0' + str(dayraw)
+                      else:
+                          day = str(dayraw)
+                      monthraw = today.month
+                      if int(monthraw) < 10:
+                          month = '0' + str(monthraw)
+                      else:
+                          month = str(monthraw)
+                      year = today.year
+                      today2= day + '/' + month + '/' + str(year)
+
+                      stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';iOS;channel;buttons'
+                      with open(paths['stats']+'stats.csv','a',newline='') as f:
+                          writer=csv.writer(f)
+                          writer.writerow([stat])
+            elif len(args) == 1 and args[0] == 'tdesktop-channel':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                      f= open(paths['versions']+"tdesktop_version.txt","r")
+                      tdesk_version= f.read(10)
+                      f.close()
+                      ttdesktop= "Heu triat el paquet de llengua per a *Telegram Desktop*.\n\nUs enviem la versió " + str(tdesk_version) + " del paquet. Podeu demanar-ne la versió més actual sempre que ho desitgeu.\n\n*Intruccions d'instal·lació*:\n1r. *Baixeu el fitxer* «tdesktop.strings» enviat després d'aquest missatge i recordeu la carpeta on es troba, habitualment `./Baixades/Telegram Desktop` del vostre perfil d'usuari.\n2n. Aneu a la configuració del Telegram Desktop («Settings» o «Ajustes») i, *a l'aire, teclegeu* «loadlang».\n3r. Trieu el fitxer «tdesktop.strings» baixat al pas 1.\n4t. Confirmeu el reinici del Telegram Desktop.\n\n*Nota*: no esborreu de l'ordinador el fitxer que heu baixat.\n\nSi voleu que us avisem quan hi hagi una versió nova del paquet de llengua, o notícies de Softcatalà, uniu-vos al [Canal de Softcatalà](https://telegram.me/CanalSoftcatala)."
+                      f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+                      ftdesktop= f.read(32)
+                      f.close()
+                      bot.sendMessage(update.message.chat_id,
+                                      parse_mode='Markdown',
+                                      disable_web_page_preview=True,
+                                      text= ttdesktop
+                      )
+                      bot.sendDocument(update.message.chat_id,
+                                       document=ftdesktop)
+
+                      user_id = update.message.from_user.id
+                      today= datetime.now()
+                      dayraw = today.day
+                      if int(dayraw) < 10:
+                          day = '0' + str(dayraw)
+                      else:
+                          day = str(dayraw)
+                      monthraw = today.month
+                      if int(monthraw) < 10:
+                          month = '0' + str(monthraw)
+                      else:
+                          month = str(monthraw)
+                      year = today.year
+                      today2= day + '/' + month + '/' + str(year)
+
+                      stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';tdesktop;channel;buttons'
+                      with open(paths['stats']+'stats.csv','a',newline='') as f:
+                          writer=csv.writer(f)
+                          writer.writerow([stat])
+            #CHANGE INLINE STATUS
+            elif len(args) == 1 and args[0] == 'change-inline-status':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                    with open(paths['inline']+'inline_status.csv', 'rt') as f:
+                      reader = csv.reader(f, delimiter=',')
+                      for row in reader:
+                        for field in row:
+                          if field == str(user_id) + '_admin':
+                            status = {str(user_id): 'normal'}
+                            inline_status.update(status)
+                            with open(paths['inline']+'inline_status.csv', 'w') as f:
+                                 [f.write('{0}_{1}\n'.format(key, value)) for key, value in inline_status.items()]
+                            bot.sendMessage(update.message.chat_id,
+			           parse_mode='Markdown',
+			           text= "Ara sou un usuari *normal* per a les consultes _inline_."
+	                    )
+                          elif field == str(user_id) + '_normal':
+                            status = {str(user_id): 'admin'}
+                            inline_status.update(status)
+                            with open(paths['inline']+'inline_status.csv', 'w') as f:
+                                 [f.write('{0}_{1}\n'.format(key, value)) for key, value in inline_status.items()]
+                            bot.sendMessage(update.message.chat_id,
+			           parse_mode='Markdown',
+			           text= "Ara sou un usuari *administrador* per a les consultes _inline_."
+	                    )
             else:
                 bot.sendMessage(update.message.chat_id,
 			    parse_mode='Markdown',

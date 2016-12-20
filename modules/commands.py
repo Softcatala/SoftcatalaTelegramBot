@@ -4,6 +4,10 @@ import time
 import csv
 from datetime import datetime
 
+from requests import get
+import requests
+import json
+
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
@@ -11,7 +15,7 @@ from validators import url, ValidationFailure
 
 from store import TinyDBStore
 
-from config import allowed_users, paths
+from config import params, allowed_users, paths, chats
 
 FIELDS = [
     {
@@ -252,28 +256,41 @@ class CommandsModule(object):
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
+            CommandHandler('hello', self.hello_command),
             MessageHandler([Filters.text,Filters.document], self.message)
         ]
         self.store = TinyDBStore()
 
     def start_command(self, bot, update, args):
         user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
+        chat= str(update.message.chat_id)
+        if str(user_id) in allowed_users.values() and chat != chats['group']:
             self.store.new_draft(user_id)
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
                         text="Crearem una publicació per a compartir.\n\n\u0031\u20E3 El primer que heu de fer és enviar-me el *nom de la publicació*.\n\nSi no voleu continuar amb el procés, envieu /cancel.",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                        parse_mode='Markdown',
-                        text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            chat= str(update.message.chat_id)
+            if chat != chats['group']:
+                 bot.sendMessage(update.message.chat_id,
+                             parse_mode='Markdown',
+                             text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            else:
+                 bot.sendMessage(update.message.chat_id,
+                             parse_mode='Markdown',
+                             text= "No es permet crear publicacions des del grup.")
+
+    def hello_command(self, bot, update):
+        user_id = update.message.from_user.id
+        if str(user_id) in allowed_users.values():
+            bot.sendMessage(chat_id= chats['group'], text='Hello world!')
 
     def admin_command(self, bot, update):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
-                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n\nI per ara ja està",
+                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n/getfiles\n/hello\n\nI per ara ja està",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name
@@ -564,12 +581,14 @@ class CommandsModule(object):
                   self.update_draft(bot, event, user_id, update, current_field)
 
         else:
-            bot.sendMessage(
-            update.message.chat_id,
-            parse_mode='Markdown',
-            text="\U0001F914 No entenc el que em voleu dir, però sóc un robot \U0001F916 i encara no sóc en funcionament. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.",
-            reply_markup=ReplyKeyboardHide()
-            )
+            chat= str(update.message.chat_id)
+            if chat != chats['group']:
+                 bot.sendMessage(
+                 update.message.chat_id,
+                 parse_mode='Markdown',
+                 text="\U0001F914 No entenc el que em voleu dir, però sóc un robot \U0001F916 i encara no sóc en funcionament. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.",
+                 reply_markup=ReplyKeyboardHide()
+                 )
 
     def cancel_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -995,104 +1014,223 @@ class CommandsModule(object):
     def create_event(self, bot, update, event):
         if event['type'] == 'Paquets de llengua' and event['validate'] == 'No':
             self.cancel_command(bot, update)
-        elif event['android'] == 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] == 'NOT':
-            bot.sendMessage(
-                 update.message.chat_id,
-                 text="No té sentit generar l'actualització de paquets si no n'heu actualitzat cap. Procediré amb la cancel·lació de l'actualització de paquets.",
-                 reply_markup=ReplyKeyboardHide()
-                 )
-            self.cancel_command(bot, update)
-        else:
-             if event['type'] == 'Paquets de llengua':
-                 if int(event['day']) > 9:
-                      day = event['day']
-                 else:
-                      day = '0' + event['day']
-                 year = event['year']
-                 if event['month'] == 'Gener':
-                      monthnum = '01'
-                 elif event['month'] == 'Febrer':
-                      monthnum = '02'
-                 elif event['month'] == 'Març':
-                      monthnum = '03'
-                 elif event['month'] == 'Abril':
-                      monthnum = '04'
-                 elif event['month'] == 'Maig':
-                      monthnum = '05'
-                 elif event['month'] == 'Juny':
-                      monthnum = '06'
-                 elif event['month'] == 'Juliol':
-                      monthnum = '07'
-                 elif event['month'] == 'Agost':
-                      monthnum = '08'
-                 elif event['month'] == 'Setembre':
-                      monthnum = '09'
-                 elif event['month'] == 'Octubre':
-                      monthnum = '10'
-                 elif event['month'] == 'Novembre':
-                      monthnum = '11'
-                 else:
-                      monthnum = '12'
-                 newdate = day + "/" + monthnum + "/" + year
-                 versiontxt=open(paths['versions']+'current_version.txt','w')
-                 versiontxt.write(newdate)
-                 versiontxt.close()
-                 if event['android'] != 'NOT':
-                      f= open(paths['file_ids']+'draft_and_file_id.txt','r')
-                      and_file_id= f.read(32)
-                      f.close()
-                      f=open(paths['file_ids']+'android_file_id.txt','w')
-                      f.write(and_file_id)
-                      f.close()
-                      f= open(paths['versions']+'draft_and_version.txt','r')
+        elif event['type'] == 'Paquets de llengua' and event['validate'] == 'Sí':
+             if event['android'] == 'NOT' and event['ios'] == 'NOT' and event['tdesktop'] == 'NOT':
+                 bot.sendMessage(
+                      update.message.chat_id,
+                      text="No té sentit generar l'actualització de paquets si no n'heu actualitzat cap. Procediré amb la cancel·lació de l'actualització de paquets.",
+                      reply_markup=ReplyKeyboardHide()
+                      )
+                 self.cancel_command(bot, update)
+             else:
+                 if event['type'] == 'Paquets de llengua':
+                      #SAVE DATA IN TXT FILES
+                      if int(event['day']) > 9:
+                           day = event['day']
+                      else:
+                           day = '0' + event['day']
+                      year = event['year']
+                      if event['month'] == 'Gener':
+                           monthnum = '01'
+                      elif event['month'] == 'Febrer':
+                           monthnum = '02'
+                      elif event['month'] == 'Març':
+                           monthnum = '03'
+                      elif event['month'] == 'Abril':
+                           monthnum = '04'
+                      elif event['month'] == 'Maig':
+                           monthnum = '05'
+                      elif event['month'] == 'Juny':
+                           monthnum = '06'
+                      elif event['month'] == 'Juliol':
+                           monthnum = '07'
+                      elif event['month'] == 'Agost':
+                           monthnum = '08'
+                      elif event['month'] == 'Setembre':
+                           monthnum = '09'
+                      elif event['month'] == 'Octubre':
+                           monthnum = '10'
+                      elif event['month'] == 'Novembre':
+                           monthnum = '11'
+                      else:
+                           monthnum = '12'
+                      newdate = day + "/" + monthnum + "/" + year
+                      versiontxt=open(paths['versions']+'current_version.txt','w')
+                      versiontxt.write(newdate)
+                      versiontxt.close()
+                      if event['android'] != 'NOT':
+                           f= open(paths['file_ids']+'draft_and_file_id.txt','r')
+                           and_file_id= f.read(32)
+                           f.close()
+                           f=open(paths['file_ids']+'android_file_id.txt','w')
+                           f.write(and_file_id)
+                           f.close()
+                           f= open(paths['versions']+'draft_and_version.txt','r')
+                           and_version= f.read(10)
+                           f.close()
+                           f=open(paths['versions']+'android_version.txt','w')
+                           f.write(and_version)
+                           f.close()
+                           #LOCAL STORAGE FOR ANDROID FILES 
+                           f= open(paths['file_ids']+"android_file_id.txt","r")
+                           fandroid= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'strings.xml'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"android_version.txt","r")
+                           and_version= f.read(10)
+                           f.close()
+                           and_version2= str.replace(and_version, "/", "-")
+                           received2= paths['local_packs'] + 'strings-' + and_version2 + '.xml'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                      if event['ios'] != 'NOT':
+                           f= open(paths['file_ids']+'draft_ios_file_id.txt','r')
+                           ios_file_id= f.read(32)
+                           f.close()
+                           f=open(paths['file_ids']+'ios_file_id.txt','w')
+                           f.write(ios_file_id)
+                           f.close()
+                           f= open(paths['versions']+'draft_ios_version.txt','r')
+                           ios_version= f.read(10)
+                           f.close()
+                           f=open(paths['versions']+'ios_version.txt','w')
+                           f.write(ios_version)
+                           f.close()
+                           #LOCAL STORAGE FOR IOS FILES 
+                           f= open(paths['file_ids']+"ios_file_id.txt","r")
+                           fios= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'Localizable-ios.strings'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"ios_version.txt","r")
+                           ios_version= f.read(10)
+                           f.close()
+                           ios_version2= str.replace(ios_version, "/", "-")
+                           received2= paths['local_packs'] + 'Localizable-ios-' + ios_version2 + '.strings'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                      if event['tdesktop'] != 'NOT':
+                           f= open(paths['file_ids']+'draft_tdesk_file_id.txt','r')
+                           tdesk_file_id= f.read(32)
+                           f.close()
+                           f=open(paths['file_ids']+'tdesktop_file_id.txt','w')
+                           f.write(tdesk_file_id)
+                           f.close()
+                           f= open(paths['versions']+'draft_tdesk_version.txt','r')
+                           tdesk_version= f.read(10)
+                           f.close()
+                           f=open(paths['versions']+'tdesktop_version.txt','w')
+                           f.write(tdesk_version)
+                           f.close()
+                           #LOCAL STORAGE FOR TELEGRAM DESKTOP FILES 
+                           f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+                           ftdesktop= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'tdesktop.strings'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"tdesktop_version.txt","r")
+                           tdesk_version= f.read(10)
+                           f.close()
+                           tdesk_version2= str.replace(tdesk_version, "/", "-")
+                           received2= paths['local_packs'] + 'tdesktop-' + tdesk_version2 + '.strings'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                      #SEND MESSAGE TO GROUP
+                      f= open(paths['versions']+"android_version.txt","r")
                       and_version= f.read(10)
                       f.close()
-                      f=open(paths['versions']+'android_version.txt','w')
-                      f.write(and_version)
-                      f.close()
-                 if event['ios'] != 'NOT':
-                      f= open(paths['file_ids']+'draft_ios_file_id.txt','r')
-                      ios_file_id= f.read(32)
-                      f.close()
-                      f=open(paths['file_ids']+'ios_file_id.txt','w')
-                      f.write(ios_file_id)
-                      f.close()
-                      f= open(paths['versions']+'draft_ios_version.txt','r')
+                      if event['android'] != 'NOT':
+                           f= open(paths['file_ids']+"android_file_id.txt","r")
+                           and_file_id= f.read(32)
+                           f.close()
+                           emoji_and= '\u2705 '
+                      else:
+                           emoji_and= '\u274C '
+                      f= open(paths['versions']+"ios_version.txt","r")
                       ios_version= f.read(10)
                       f.close()
-                      f=open(paths['versions']+'ios_version.txt','w')
-                      f.write(ios_version)
-                      f.close()
-                 if event['tdesktop'] != 'NOT':
-                      f= open(paths['file_ids']+'draft_tdesk_file_id.txt','r')
-                      tdesk_file_id= f.read(32)
-                      f.close()
-                      f=open(paths['file_ids']+'tdesktop_file_id.txt','w')
-                      f.write(tdesk_file_id)
-                      f.close()
-                      f= open(paths['versions']+'draft_tdesk_version.txt','r')
+                      if event['ios'] != 'NOT':
+                           f= open(paths['file_ids']+"ios_file_id.txt","r")
+                           ios_file_id= f.read(32)
+                           f.close()
+                           emoji_ios= '\u2705 '
+                      else:
+                           emoji_ios= '\u274C '
+                      f= open(paths['versions']+"tdesktop_version.txt","r")
                       tdesk_version= f.read(10)
                       f.close()
-                      f=open(paths['versions']+'tdesktop_version.txt','w')
-                      f.write(tdesk_version)
-                      f.close()
-             self.store.insert_event(event)
-             self.store.remove_draft(update.message.from_user.id)
-
-             keyboard = [[InlineKeyboardButton(text="Envia la publicació", switch_inline_query=event['name'])], []]
-
-             if event['type'] == 'Paquets de llengua':
-                   bot.sendMessage(
-                       update.message.chat_id,
-                       text="S'ha acabat l'actualització dels paquets de llengua",
-                       reply_markup=ReplyKeyboardHide()
-                       )
-
+                      if event['tdesktop'] != 'NOT':
+                           f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+                           tdesk_file_id= f.read(32)
+                           f.close()
+                           emoji_tdesk= '\u2705 '
+                      else:
+                           emoji_tdesk= '\u274C '
+                      f_name = update.message.from_user.first_name
+                      bot.sendMessage(
+                          chat_id= chats['group'],
+                          parse_mode='Markdown',
+                          text= '*' + str(f_name) + '* ha actualitzat els paquets de llengua:\n\n' + emoji_and + 'Android: ' + and_version + '\n' + emoji_ios + 'iOS: ' + ios_version + '\n' + emoji_tdesk + 'Telegram Desktop: ' + tdesk_version + '.\n\nLa publicació s\'ha desat amb el nom *«' + event['name'] + '»*.'
+                      )
+                      if event['android'] != 'NOT':
+                            bot.sendDocument(chat_id= chats['group'],
+                                  document=and_file_id)
+                      if event['ios'] != 'NOT':
+                            bot.sendDocument(chat_id= chats['group'],
+                                  document=ios_file_id)
+                      if event['tdesktop'] != 'NOT':
+                            bot.sendDocument(chat_id= chats['group'],
+                                  document=tdesk_file_id)
+        elif event['type'] == 'Esdeveniment':
+             f_name = update.message.from_user.first_name
              bot.sendMessage(
-                 update.message.chat_id,
-                 text="S'ha creat la publicació",
-                 reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+                 chat_id= chats['group'],
+                 parse_mode='Markdown',
+                 text= '*' + str(f_name) + '* ha creat l\'esdeveniment *«' + event['name'] + '»* amb data ' + event['day'] + ' de ' + event['month'] + ' de ' + event['year'] + '.'
              )
+        elif event['type'] == 'Notícia':
+             f_name = update.message.from_user.first_name
+             bot.sendMessage(
+                 chat_id= chats['group'],
+                 parse_mode='Markdown',
+                 text= '*' + str(f_name) + '* ha creat la notícia *«' + event['name'] + '»*.'
+             )
+        self.store.insert_event(event)
+        self.store.remove_draft(update.message.from_user.id)
+
+        keyboard = [[InlineKeyboardButton(text="Envia la publicació", switch_inline_query=event['name'])], []]
+
+        if event['type'] == 'Paquets de llengua':
+              bot.sendMessage(
+                    update.message.chat_id,
+                    text="S'ha acabat l'actualització dels paquets de llengua",
+                    reply_markup=ReplyKeyboardHide()
+                    )
+
+        bot.sendMessage(
+        update.message.chat_id,
+        text="S'ha creat la publicació",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+        )
 
     def get_handlers(self):
         return self.handlers

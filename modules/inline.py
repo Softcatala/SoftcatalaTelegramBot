@@ -3,22 +3,22 @@ import base64
 import datetime
 import locale
 import json
+import csv
 from six.moves import urllib
 
-from telegram import InlineQueryResultArticle, ParseMode, \
+from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ParseMode, \
     InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
 from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
 
-from config import paths
+from config import allowed_users, paths, inline_status
 
 
 def create_event_payload(event):
     event_string = json.dumps(event)
     eight_bit_string = base64.b64encode(event_string.encode('ascii'))
     return urllib.parse.quote(eight_bit_string.decode('ascii'))
-
 
 def create_keyboard(event, user):
     if event.get('type') and event['type'] == 'Esdeveniment':
@@ -95,7 +95,7 @@ def create_keyboard(event, user):
                old_ios= ''
           if event.get('tdesktop') and event['tdesktop'] == 'NOT':
                f= open(paths['versions']+"tdesktop_version.txt","r")
-               tdeskop_date= f.read(10)
+               tdesktop_date= f.read(10)
                f.close()
                old_tdesk= ' (' + tdesktop_date + ')'
           else:
@@ -103,19 +103,19 @@ def create_keyboard(event, user):
           button1 = [
               InlineKeyboardButton(
                   text="Android" + old_and,
-                  url='http://telegram.me/Softcatalabot?start=android'
+                  url='http://telegram.me/Softcatalabot?start=android-channel'
               )
           ]
           button2 = [
               InlineKeyboardButton(
                   text="iOS" + old_ios,
-                  url='http://telegram.me/Softcatalabot?start=ios'
+                  url='http://telegram.me/Softcatalabot?start=ios-channel'
               )
           ]
           button3 = [
               InlineKeyboardButton(
                   text="TDesktop" + old_tdesk,
-                  url='http://telegram.me/Softcatalabot?start=tdesktop'
+                  url='http://telegram.me/Softcatalabot?start=tdesktop-channel'
               )
           ]
 
@@ -128,6 +128,11 @@ def format_date(param):
     date = datetime.datetime.fromtimestamp(timestamp)
     return date.strftime("%A, %d %B %Y a les %H.%M hores")
 
+def create_pack_message(pack):
+    message_text = "*{name}*".format(
+        name=pack['name']
+    )
+    return message_text
 
 def create_event_message(event, user):
     if 'type' in event and event['type'] == 'Esdeveniment':
@@ -185,7 +190,7 @@ def create_event_message(event, user):
           ios_date= f.read(10)
           f.close()
           f= open(paths['versions']+"tdesktop_version.txt","r")
-          tdeskop_date= f.read(10)
+          tdesktop_date= f.read(10)
           f.close()
           #message_text = "*{name}*\n".format(
           #    name=event['name']
@@ -346,30 +351,64 @@ class InlineModule(object):
         user_id = update.inline_query.from_user.id
         user = update.inline_query.from_user.__dict__
 
-        results = []
-        events = self.store.get_events(user_id, query)
+        if str(user_id) in allowed_users.values():
+          with open(paths['inline']+'inline_status.csv', 'rt') as f:
+            reader = csv.reader(f, delimiter=',')
+            for row in reader:
+              for field in row:
+                if field == str(user_id) + '_admin':
+                  results = []
+                  events = self.store.get_events(user_id, query)
 
-        for event in events:
-            keyboard = create_keyboard(event, user)
-            result = InlineQueryResultArticle(id=event.eid,
-                                              title=event['name'],
-                                              description=event['description'],
-                                              thumb_url='https://gent.softcatala.org/albert/softcatalabot/softcatalabot_calendar.png',
-                                              input_message_content=InputTextMessageContent(
-                                                  create_event_message(event, user),
-                                                  parse_mode=ParseMode.MARKDOWN,
-						  disable_web_page_preview=True
-                                              ),
-                                              reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
-            results.append(result)
+                  for event in events:
+                      keyboard = create_keyboard(event, user)
+                      result = InlineQueryResultArticle(id=event.eid,
+                                                        title=event['name'],
+                                                        description=event['description'],
+                                                        thumb_url='https://gent.softcatala.org/albert/softcatalabot/softcatalabot_calendar.png',
+                                                        input_message_content=InputTextMessageContent(
+                                                            create_event_message(event, user),
+                                                            parse_mode=ParseMode.MARKDOWN,
+						            disable_web_page_preview=True
+                                                        ),
+                                                        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
+                      results.append(result)
 
-        bot.answerInlineQuery(
-            update.inline_query.id,
-            results=results,
-            switch_pm_text='Crea una publicació nova...',
-            switch_pm_parameter='new',
-            is_personal=True
-        )
+                  bot.answerInlineQuery(
+                      update.inline_query.id,
+                      results=results,
+                      cache_time=30,
+                      switch_pm_text='Canvia l\'estatus de l\'inline a normal',
+                      switch_pm_parameter='change-inline-status',
+                      is_personal=True
+                  )
+
+        #elif str(user_id) in allowed_users.values() and inline_status[str(user_id)] == 'normal':
+                elif field == str(user_id) + '_normal':
+                  results = []
+                  packs = self.store.get_packs(query)
+
+                  for pack in packs: 
+                      #keyboard = create_keyboard(event, user)
+                      result = InlineQueryResultCachedDocument(id=pack.eid,
+                                                               title=pack['name'],
+                                                               document_file_id=pack['cached_id'],
+                                                               description=pack['description']
+                                                               #input_message_content=InputTextMessageContent(
+                                                               #      pack['message'],
+                                                               #      parse_mode=ParseMode.MARKDOWN,
+						               #      disable_web_page_preview=True)
+                                                               )
+                      results.append(result)
+
+                  bot.answerInlineQuery(
+                      update.inline_query.id,
+                      results=results,
+                      cache_time=30,
+                      switch_pm_text='Canvia l\'estatus de l\'inline a administrador',
+                      switch_pm_parameter='change-inline-status',
+                      is_personal=True
+                  )
 
     def get_handlers(self):
         return self.handlers
