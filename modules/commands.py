@@ -4,6 +4,10 @@ import time
 import csv
 from datetime import datetime
 
+from requests import get
+import requests
+import json
+
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
@@ -11,7 +15,7 @@ from validators import url, ValidationFailure
 
 from store import TinyDBStore
 
-from config import allowed_users, paths, chats
+from config import params, allowed_users, paths, chats
 
 FIELDS = [
     {
@@ -286,7 +290,7 @@ class CommandsModule(object):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
-                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n/download\n/hello\n\nI per ara ja està",
+                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n/getfiles\n/hello\n\nI per ara ja està",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name
@@ -1067,6 +1071,25 @@ class CommandsModule(object):
                            f=open(paths['versions']+'android_version.txt','w')
                            f.write(and_version)
                            f.close()
+                           #LOCAL STORAGE FOR ANDROID FILES 
+                           f= open(paths['file_ids']+"android_file_id.txt","r")
+                           fandroid= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'strings.xml'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"android_version.txt","r")
+                           and_version= f.read(10)
+                           f.close()
+                           and_version2= str.replace(and_version, "/", "-")
+                           received2= paths['local_packs'] + 'strings-' + and_version2 + '.xml'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
                       if event['ios'] != 'NOT':
                            f= open(paths['file_ids']+'draft_ios_file_id.txt','r')
                            ios_file_id= f.read(32)
@@ -1080,6 +1103,25 @@ class CommandsModule(object):
                            f=open(paths['versions']+'ios_version.txt','w')
                            f.write(ios_version)
                            f.close()
+                           #LOCAL STORAGE FOR IOS FILES 
+                           f= open(paths['file_ids']+"ios_file_id.txt","r")
+                           fios= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'Localizable-ios.strings'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"ios_version.txt","r")
+                           ios_version= f.read(10)
+                           f.close()
+                           ios_version2= str.replace(ios_version, "/", "-")
+                           received2= paths['local_packs'] + 'Localizable-ios-' + ios_version2 + '.strings'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
                       if event['tdesktop'] != 'NOT':
                            f= open(paths['file_ids']+'draft_tdesk_file_id.txt','r')
                            tdesk_file_id= f.read(32)
@@ -1093,6 +1135,25 @@ class CommandsModule(object):
                            f=open(paths['versions']+'tdesktop_version.txt','w')
                            f.write(tdesk_version)
                            f.close()
+                           #LOCAL STORAGE FOR TELEGRAM DESKTOP FILES 
+                           f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+                           ftdesktop= f.read(32)
+                           f.close()
+                           r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+                           output= r.json()
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           received= paths['local_packs'] + 'tdesktop.strings'
+                           with open(received, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
+                           f= open(paths['versions']+"tdesktop_version.txt","r")
+                           tdesk_version= f.read(10)
+                           f.close()
+                           tdesk_version2= str.replace(tdesk_version, "/", "-")
+                           received2= paths['local_packs'] + 'tdesktop-' + tdesk_version2 + '.strings'
+                           with open(received2, "wb") as file:
+                               response = get(file_url)
+                               file.write(response.content)
                       #SEND MESSAGE TO GROUP
                       f= open(paths['versions']+"android_version.txt","r")
                       and_version= f.read(10)

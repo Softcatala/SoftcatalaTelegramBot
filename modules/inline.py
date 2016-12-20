@@ -377,7 +377,8 @@ class InlineModule(object):
                   bot.answerInlineQuery(
                       update.inline_query.id,
                       results=results,
-                      switch_pm_text='Canvia l\'estatus per a l\'inline...',
+                      cache_time=30,
+                      switch_pm_text='Canvia l\'estatus de l\'inline a normal',
                       switch_pm_parameter='change-inline-status',
                       is_personal=True
                   )
@@ -404,7 +405,7 @@ class InlineModule(object):
                       update.inline_query.id,
                       results=results,
                       cache_time=30,
-                      switch_pm_text='Canvia l\'estatus per a l\'inline...',
+                      switch_pm_text='Canvia l\'estatus de l\'inline a administrador',
                       switch_pm_parameter='change-inline-status',
                       is_personal=True
                   )

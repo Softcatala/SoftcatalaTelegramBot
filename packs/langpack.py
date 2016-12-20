@@ -25,7 +25,7 @@ class LangpackModule(object):
             CommandHandler('ios', self.ios_command),
             CommandHandler('tdesktop', self.tdesktop_command),
             CommandHandler('stats', self.stats_command),
-            CommandHandler('download', self.test_command),
+            CommandHandler('getfiles', self.getfiles_command),
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
@@ -112,28 +112,46 @@ class LangpackModule(object):
         callback_query_id=query.id
         bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
 
-    def test_command(self, bot, update):
+    def getfiles_command(self, bot, update):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
-            f= open(paths['file_ids']+"android_file_id.txt","r")
-            fandroid= f.read(32)
+            bot.sendMessage(update.message.chat_id,
+                            parse_mode='Markdown',
+                            text= "Us envio els fitxers desats al servidor (còpia de seguretat) per a cada plataforma. Veureu que hi ha la versió normal i la versió desada amb la data (els dos fitxers han de ser iguals)."
+            )
+            #SEND LOCAL ANDROID FILES
+            f= open(paths['versions']+"android_version.txt","r")
+            and_version= f.read(10)
             f.close()
-            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
-            output= r.json()
-            file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
-            received= paths['local_packs'] + 'strings.xml'
-            with open(received, "wb") as file:
-                response = get(file_url)
-                file.write(response.content)
-            bot.sendMessage(update.message.chat_id,
-                    disable_web_page_preview=True,
-                    text= output
-            )
-            bot.sendMessage(update.message.chat_id,
-                    disable_web_page_preview=True,
-                    parse_mode='Markdown',
-                    text= 'El path és *' + output['result']['file_path'] + '*.'
-            )
+            and_version2= str.replace(and_version, "/", "-")
+            android_file= open(paths['local_packs']+'strings.xml', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=android_file)
+            android_file_v= open(paths['local_packs']+'strings-' +and_version2+ '.xml', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=android_file_v)
+            #SEND LOCAL IOS FILES
+            f= open(paths['versions']+"ios_version.txt","r")
+            ios_version= f.read(10)
+            f.close()
+            ios_version2= str.replace(ios_version, "/", "-")
+            ios_file= open(paths['local_packs']+'Localizable-ios.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=ios_file)
+            ios_file_v= open(paths['local_packs']+'Localizable-ios-' +and_version2+ '.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=ios_file_v)
+            #SEND LOCAL TELEGRAM DESKTOP FILES
+            f= open(paths['versions']+"tdesktop_version.txt","r")
+            tdesk_version= f.read(10)
+            f.close()
+            tdesk_version2= str.replace(tdesk_version, "/", "-")
+            tdesktop_file= open(paths['local_packs']+'tdesktop.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=tdesktop_file)
+            tdesktop_file_v= open(paths['local_packs']+'tdesktop-' +tdesk_version2+ '.strings', 'rb')
+            bot.sendDocument(update.message.chat_id,
+                             document=tdesktop_file_v) 
 
     def download_command(self, bot, update, args):
         user_id = update.message.from_user.id
