@@ -6,7 +6,7 @@
 import logging
 import os
 
-from telegram.ext import Updater
+from telegram.ext import Updater, Job
 
 from modules.commands import CommandsModule
 from modules.inline import InlineModule
@@ -36,6 +36,7 @@ def load_langpack(dispatcher, packs):
 
 def main():
     updater = Updater(params['token'])
+    j = updater.job_queue
 
     dp = updater.dispatcher
 
@@ -47,6 +48,8 @@ def main():
     updater.start_polling()
     updater.idle()
 
+    job_minute = Job(callback_test, 1.0)
+    j.put(job_minute, next_t=0.0)
 
 if __name__ == '__main__':
     main()

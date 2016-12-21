@@ -26,7 +26,7 @@ class LangpackModule(object):
             CommandHandler('tdesktop', self.tdesktop_command),
             CommandHandler('stats', self.stats_command),
             CommandHandler('getfiles', self.getfiles_command),
-            CommandHandler('testfiles', self.testfiles_command),
+            #CommandHandler('testfiles', self.testfiles_command),
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
@@ -113,7 +113,7 @@ class LangpackModule(object):
         callback_query_id=query.id
         bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
 
-    def testfiles_command(self, bot, update):
+    def callback_test(bot, update, job):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
              testfiles= 0
