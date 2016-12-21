@@ -7,7 +7,7 @@ import csv
 from six.moves import urllib
 
 from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ParseMode, \
-    InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
+    InputTextMessageContent, InputMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
 from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
@@ -127,12 +127,6 @@ def format_date(param):
     timestamp = int(param)
     date = datetime.datetime.fromtimestamp(timestamp)
     return date.strftime("%A, %d %B %Y a les %H.%M hores")
-
-def create_pack_message(pack):
-    message_text = "*{name}*".format(
-        name=pack['name']
-    )
-    return message_text
 
 def create_event_message(event, user):
     if 'type' in event and event['type'] == 'Esdeveniment':
@@ -389,15 +383,12 @@ class InlineModule(object):
                   packs = self.store.get_packs(query)
 
                   for pack in packs: 
-                      #keyboard = create_keyboard(event, user)
+
                       result = InlineQueryResultCachedDocument(id=pack.eid,
                                                                title=pack['name'],
                                                                document_file_id=pack['cached_id'],
-                                                               description=pack['description']
-                                                               #input_message_content=InputTextMessageContent(
-                                                               #      pack['message'],
-                                                               #      parse_mode=ParseMode.MARKDOWN,
-						               #      disable_web_page_preview=True)
+                                                               description=pack['description'],
+                                                               caption=pack['howto']
                                                                )
                       results.append(result)
 
