@@ -257,7 +257,7 @@ class CommandsModule(object):
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
             CommandHandler('hello', self.hello_command),
-            MessageHandler((Filters.text & Filters.document), self.message)
+            MessageHandler((Filters.text | Filters.document), self.message)
         ]
         self.store = TinyDBStore()
 
@@ -1200,6 +1200,30 @@ class CommandsModule(object):
                       if event['tdesktop'] != 'NOT':
                             bot.sendDocument(chat_id= chats['group'],
                                   document=tdesk_file_id)
+                      #UPGRADE JSON FILE FOR INLINE
+                      f= open(paths['file_ids']+'android_file_id.txt','r')
+                      and_file_id= f.read(32)
+                      f.close()
+                      f= open(paths['file_ids']+'ios_file_id.txt','r')
+                      ios_file_id= f.read(32)
+                      f.close()
+                      f= open(paths['file_ids']+'tdesktop_file_id.txt','r')
+                      tdesk_file_id= f.read(32)
+                      f.close()
+                      f= open(paths['versions']+"android_version.txt","r")
+                      and_version= f.read(10)
+                      f.close()
+                      f= open(paths['versions']+"ios_version.txt","r")
+                      ios_version= f.read(10)
+                      f.close()
+                      f= open(paths['versions']+"tdesktop_version.txt","r")
+                      tdesk_version= f.read(10)
+                      f.close()
+                      inline_json= '{"_default": {"1": {"what": "pack", "description": "Paquet català per al Telegram per Android. Versió: ' + and_version + '.", "cached_id": "' + and_file_id + '", "howto": "Baixeu el fitxer, toqueu sobre el símbol «⋮», a la part superior dreta del fitxer, i seleccioneu «Apply Localization file».", "name": "Android"}, "2": {"what": "pack", "description": "Paquet català per al Telegram per iOS. Versió: ' + ios_version + '.", "cached_id": "' + ios_file_id + '", "howto": "Baixeu el fitxer, toqueu sobre ell i seleccioneu «Apply Localization».", "name": "iOS"}, "3": {"what": "pack", "description": "Paquet català per al Telegram per Telegram Desktop. Versió: ' + tdesk_version + '.", "cached_id": "' + tdesk_file_id + '", "howto": "Baixeu el fitxer a l\'ordinador, aneu a la configuració del Telegram i escriviu «loadlang». S\'obrirà un menú: trieu el paquet de llengua que heu baixat i reinicieu el Telegram.", "name": "Telegram Desktop"}}}'
+                      f=open(paths['posts']+'packs.json','w')
+                      f.write(inline_json)
+                      f.close()
+
         elif event['type'] == 'Esdeveniment':
              f_name = update.message.from_user.first_name
              bot.sendMessage(
@@ -1220,17 +1244,24 @@ class CommandsModule(object):
         keyboard = [[InlineKeyboardButton(text="Envia la publicació", switch_inline_query=event['name'])], []]
 
         if event['type'] == 'Paquets de llengua':
-              bot.sendMessage(
-                    update.message.chat_id,
-                    text="S'ha acabat l'actualització dels paquets de llengua",
-                    reply_markup=ReplyKeyboardHide()
-                    )
-
-        bot.sendMessage(
-        update.message.chat_id,
-        text="S'ha creat la publicació",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
-        )
+            if event['android'] != 'NOT' or event['ios'] != 'NOT' or event['tdesktop'] != 'NOT':
+                 bot.sendMessage(
+                       update.message.chat_id,
+                       text="S'ha acabat l'actualització dels paquets de llengua",
+                       reply_markup=ReplyKeyboardHide()
+                       )
+                 bot.sendMessage(
+                 update.message.chat_id,
+                 text="S'ha creat la publicació",
+                 reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+                 )
+        
+        else:
+            bot.sendMessage(
+            update.message.chat_id,
+            text="S'ha creat la publicació",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+            )
 
     def get_handlers(self):
         return self.handlers
