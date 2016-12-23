@@ -7,6 +7,9 @@ import logging
 import os
 
 from telegram.ext import Updater
+from requests import get
+import requests
+import json
 
 from modules.commands import CommandsModule
 from modules.inline import InlineModule
@@ -46,7 +49,6 @@ def main():
 
     updater.start_polling()
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
