@@ -6,13 +6,13 @@ import json
 import csv
 from six.moves import urllib
 
-from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ParseMode, \
+from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ChosenInlineResult, ParseMode, \
     InputTextMessageContent, InputMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
 from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
 
-from config import allowed_users, paths, inline_status
+from config import allowed_users, paths, chats, inline_status
 
 
 def create_event_payload(event):
@@ -127,6 +127,12 @@ def format_date(param):
     timestamp = int(param)
     date = datetime.datetime.fromtimestamp(timestamp)
     return date.strftime("%A, %d %B %Y a les %H.%M hores")
+
+#def inline_stats(pack, user):
+    #selected= update.chosen_inline_result.query
+    #bot.sendMessage(chats['group'],
+    #                  parse_mode='Markdown',
+    #                  text= "Algú ha fet una consulta inline")
 
 def create_event_message(event, user):
     if 'type' in event and event['type'] == 'Esdeveniment':
@@ -388,7 +394,9 @@ class InlineModule(object):
                                                                title=pack['name'],
                                                                document_file_id=pack['cached_id'],
                                                                description=pack['description'],
-                                                               caption=pack['howto']
+                                                               caption=pack['howto'],
+                                                               #input_message_content=InputMessageContent(
+                                                               #     inline_stats(pack, user))
                                                                )
                       results.append(result)
 

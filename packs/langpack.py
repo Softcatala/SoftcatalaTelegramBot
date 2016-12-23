@@ -11,7 +11,7 @@ from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
-from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater, Job
 
 from config import params, allowed_users, paths, chats, inline_status
 
@@ -26,10 +26,108 @@ class LangpackModule(object):
             CommandHandler('tdesktop', self.tdesktop_command),
             CommandHandler('stats', self.stats_command),
             CommandHandler('getfiles', self.getfiles_command),
-            #CommandHandler('testfiles', self.testfiles_command),
+            CommandHandler('testfiles', self.testfiles_command),
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
+
+    def testfiles_command(self, bot, update):
+        user_id = update.message.from_user.id
+        if str(user_id) in allowed_users.values():
+             testfiles= 0
+             #TEST ANDROID FILE_ID
+             f= open(paths['file_ids']+"android_file_id.txt","r")
+             fandroid= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+             output= r.json()
+             if output['ok']:
+                   testandroid= ''
+             else:
+                   testfiles+= 1
+                   testandroid= '    \U0001F6AB *Android*\n'
+             #TEST IOS FILE_ID
+             f= open(paths['file_ids']+"ios_file_id.txt","r")
+             fios= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+             output= r.json()
+             if output['ok']:
+                   testios= ''
+             else:
+                   testfiles+= 1
+                   testios= '    \U0001F6AB *iOS*\n'
+             #TEST TELEGRAM DESKTOP FILE_ID
+             f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+             ftdesktop= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+             output= r.json()
+             if output['ok']:
+                   testtdesktop= ''
+             else:
+                   testfiles+= 1
+                   testtdesktop= '    \U0001F6AB *Telegram Desktop*\n'
+             if testfiles == 0:
+                 bot.sendMessage(update.message.from_user.id,
+                      parse_mode='Markdown',
+                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
+             elif testfiles > 0:
+                 bot.sendMessage(update.message.from_user.id,
+                      parse_mode='Markdown',
+                      text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
+
+    def callback_test(bot, job):
+        #user_id = update.message.from_user.id
+        #if str(user_id) in allowed_users.values():
+             testfiles= 0
+             #TEST ANDROID FILE_ID
+             f= open(paths['file_ids']+"android_file_id.txt","r")
+             fandroid= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+             output= r.json()
+             if output['ok']:
+                   testandroid= ''
+             else:
+                   testfiles+= 1
+                   testandroid= '    \U0001F6AB *Android*\n'
+             #TEST IOS FILE_ID
+             f= open(paths['file_ids']+"ios_file_id.txt","r")
+             fios= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+             output= r.json()
+             if output['ok']:
+                   testios= ''
+             else:
+                   testfiles+= 1
+                   testios= '    \U0001F6AB *iOS*\n'
+             #TEST TELEGRAM DESKTOP FILE_ID
+             f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+             ftdesktop= f.read(32)
+             f.close()
+             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+             output= r.json()
+             if output['ok']:
+                   testtdesktop= ''
+             else:
+                   testfiles+= 1
+                   testtdesktop= '    \U0001F6AB *Telegram Desktop*\n'
+             if testfiles == 0:
+                 bot.sendMessage(chats['group'],
+                      parse_mode='Markdown',
+                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
+             elif testfiles > 0:
+                 bot.sendMessage(chats['group'],
+                      parse_mode='Markdown',
+                      text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
+
+    updater = Updater(params['token'])
+    j = updater.job_queue
+    job_minute = Job(callback_test, 43200.0)
+    j.put(job_minute, next_t=1800.0)
+    j.start()
 
     def platform_handler(self, bot, update):
         f= open(paths['versions']+"android_version.txt","r")
@@ -112,52 +210,6 @@ class LangpackModule(object):
 
         callback_query_id=query.id
         bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
-
-    def callback_test(bot, update, job):
-        user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
-             testfiles= 0
-             #TEST ANDROID FILE_ID
-             f= open(paths['file_ids']+"android_file_id.txt","r")
-             fandroid= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
-             output= r.json()
-             if output['ok']:
-                   testandroid= ''
-             else:
-                   testfiles+= 1
-                   testandroid= '    \U0001F6AB *Android*\n'
-             #TEST IOS FILE_ID
-             f= open(paths['file_ids']+"ios_file_id.txt","r")
-             fios= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
-             output= r.json()
-             if output['ok']:
-                   testios= ''
-             else:
-                   testfiles+= 1
-                   testios= '    \U0001F6AB *iOS*\n'
-             #TEST TELEGRAM DESKTOP FILE_ID
-             f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
-             ftdesktop= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
-             output= r.json()
-             if output['ok']:
-                   testtdesktop= ''
-             else:
-                   testfiles+= 1
-                   testtdesktop= '    \U0001F6AB *Telegram Desktop*\n'
-             if testfiles == 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
-             elif testfiles > 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
 
     def getfiles_command(self, bot, update):
         user_id = update.message.from_user.id
