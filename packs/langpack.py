@@ -126,7 +126,7 @@ class LangpackModule(object):
     updater = Updater(params['token'])
     j = updater.job_queue
     job_minute = Job(callback_test, 43200.0)
-    j.put(job_minute, next_t=1800.0)
+    j.put(job_minute, next_t=43200.0)
     j.start()
 
     def platform_handler(self, bot, update):
