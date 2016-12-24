@@ -128,11 +128,11 @@ def format_date(param):
     date = datetime.datetime.fromtimestamp(timestamp)
     return date.strftime("%A, %d %B %Y a les %H.%M hores")
 
-#def inline_stats(pack, user):
-    #selected= update.chosen_inline_result.query
-    #bot.sendMessage(chats['group'],
-    #                  parse_mode='Markdown',
-    #                  text= "Algú ha fet una consulta inline")
+#def inline_stats(bot, update):
+#    selected= update.chosen_inline_result.result_id
+#    bot.sendMessage(chats['group'],
+#                      parse_mode='Markdown',
+#                      text= selected)
 
 def create_event_message(event, user):
     if 'type' in event and event['type'] == 'Esdeveniment':
@@ -396,7 +396,7 @@ class InlineModule(object):
                                                                description=pack['description'],
                                                                caption=pack['howto'],
                                                                #input_message_content=InputMessageContent(
-                                                               #     inline_stats(pack, user))
+                                                               #     inline_stats(bot, update))
                                                                )
                       results.append(result)
 
