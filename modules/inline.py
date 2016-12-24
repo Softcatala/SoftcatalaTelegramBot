@@ -195,6 +195,10 @@ def create_event_message(event, user):
           #message_text = "*{name}*\n".format(
           #    name=event['name']
           #)
+          pack= ''
+          updated_packs= ''
+          not_pack= ''
+          not_updated_packs= ''
           if event['android'] != 'NOT' and event['ios'] != 'NOT' and event['tdesktop'] != 'NOT':
                 pack= 'els paquets'
                 updated_packs= 'les aplicacions d\'Android, iOS i Telegram Desktop'
