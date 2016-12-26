@@ -21,7 +21,7 @@ from config import params, allowed_users, paths, chats, inline_status
 
 class LangpackModule(object):
     def __init__(self):
-        self.handlers2 = [
+        self.handlers = [
             CommandHandler('start', self.download_command, pass_args=True),
             CommandHandler('baixa', self.download_command, pass_args=True),
             CommandHandler('android', self.android_command),
@@ -727,5 +727,5 @@ class LangpackModule(object):
                             parse_mode='Markdown',
                             text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
 
-    def get_handlers2(self):
-        return self.handlers2
+    def get_handlers(self):
+        return self.handlers

@@ -34,8 +34,8 @@ def load_modules(dispatcher, modules):
 
 def load_langpack(dispatcher, packs):
     for langpack in packs:
-        for handler2 in langpack.get_handlers2():
-            dispatcher.add_handler(handler2)
+        for handler in langpack.get_handlers():
+            dispatcher.add_handler(handler)
 
 def main():
     updater = Updater(params['token'])
