@@ -42,8 +42,8 @@ def main():
 
     dp = updater.dispatcher
 
-    load_langpack(dp, [LangpackModule()])
     load_modules(dp, [CommandsModule(), InlineModule()])
+    load_langpack(dp, [LangpackModule()])
 
     dp.add_error_handler(error)
 
