@@ -13,6 +13,9 @@ from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
 from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater, Job
 
+from store import TinyDBStore
+from modules.inline import InlineModule
+
 from config import params, allowed_users, paths, chats, inline_status
 
 
@@ -30,6 +33,8 @@ class LangpackModule(object):
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
+        self.store = TinyDBStore()
+        self.inline = InlineModule()
 
     def testfiles_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -155,61 +160,76 @@ class LangpackModule(object):
         if update.callback_query:
         #SI LA FUNCIÓ LA TRIGA UN BOTÓ INTEGRAT (ÉS A DIR, SI EXISTEIX UN CALLBACK_QUERY).
             query = update.callback_query
-            platform_name = query.data	
+            data = query.data	
+            if data != 'Android' and data != 'iOS' and data != 'tdesktop':
+                 print (query)
+                 print (data)
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                     user = query.from_user.__dict__
+                     (command, event_id) = tuple(data.split('_'))
+                     event = self.store.get_event(event_id)
+                     self.inline.callback_handler(bot, update)
         else:
         #SI LA FUNCIÓ LA TRIGA L'ORDRE «/start argument» (ÉS A DIR, SI NO EXISTEIX UN CALLBACK_QUERY).
             query = update.message
-            platform_name = query.text
+            data = query.text
+            if data != 'Android' and data != 'iOS' and data != 'tdesktop':
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                     user = query.from_user.__dict__
+                     (command, event_id) = tuple(data.split('_'))
+                     event = self.store.get_event(event_id)
+                     self.inline.callback_handler(bot, update)
         #ACÍ HI HAURA QUE VEURE LA FORMA DE TRAURE-LI EL «/start» AL message.text.		
 
-        if platform_name == 'Android':
+        if data == 'Android':
               filepack= fandroid
               textpack= tandroid
-        elif platform_name == 'iOS':
+        elif data == 'iOS':
               filepack= fios
               textpack= tios
-        elif platform_name == 'tdesktop':
+        elif data == 'tdesktop':
               filepack= ftdesktop
               textpack= ttdesktop
 
-        bot.sendMessage(chat_id=query.message.chat_id,
-        #bot.editMessageText(chat_id=query.message.chat_id,
-                            #message_id=query.message.message_id,
-		            parse_mode='Markdown',
-                            disable_web_page_preview=True,
-                            text=textpack)
+        if data == 'Android' or data == 'iOS' or data == 'tdesktop':
+               bot.sendMessage(chat_id=query.message.chat_id,
+               #bot.editMessageText(chat_id=query.message.chat_id,
+                                   #message_id=query.message.message_id,
+		                   parse_mode='Markdown',
+                                   disable_web_page_preview=True,
+                                   text=textpack)
 
-        bot.sendDocument(chat_id=query.message.chat_id,
-                         #reply_to_message_id=query.message.message_id,
-                         document=filepack)
+               bot.sendDocument(chat_id=query.message.chat_id,
+                                #reply_to_message_id=query.message.message_id,
+                                document=filepack)
 
-        user_id = update.callback_query.from_user.id
-        today= datetime.now()
-        dayraw = today.day
-        if int(dayraw) < 10:
-           day = '0' + str(dayraw)
-        else:
-           day = str(dayraw)
-        monthraw = today.month
-        if int(monthraw) < 10:
-           month = '0' + str(monthraw)
-        else:
-           month = str(monthraw)
-        year = today.year
-        today2= day + '/' + month + '/' + str(year)
+               user_id = update.callback_query.from_user.id
+               today= datetime.now()
+               dayraw = today.day
+               if int(dayraw) < 10:
+                  day = '0' + str(dayraw)
+               else:
+                  day = str(dayraw)
+               monthraw = today.month
+               if int(monthraw) < 10:
+                  month = '0' + str(monthraw)
+               else:
+                  month = str(monthraw)
+               year = today.year
+               today2= day + '/' + month + '/' + str(year)
 
-        if platform_name == 'Android':
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + platform_name + ';bot;buttons'
-        elif platform_name == "iOS":
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + platform_name + ';bot;buttons'
-        elif platform_name == "tdesktop":
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + platform_name + ';bot;buttons'
-        with open(paths['stats']+'stats.csv','a',newline='') as f:
-             writer=csv.writer(f)
-             writer.writerow([stat])
+               if data == 'Android':
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + data + ';bot;buttons'
+               elif data == "iOS":
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + data + ';bot;buttons'
+               elif data == "tdesktop":
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + data + ';bot;buttons'
+               with open(paths['stats']+'stats.csv','a',newline='') as f:
+                    writer=csv.writer(f)
+                    writer.writerow([stat])
 
-        callback_query_id=query.id
-        bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
+               callback_query_id=query.id
+               bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
 
     def getfiles_command(self, bot, update):
         user_id = update.message.from_user.id

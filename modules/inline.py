@@ -254,42 +254,43 @@ class InlineModule(object):
     def callback_handler(self, bot, update):
         query = update.callback_query
         data = query.data
-        user = query.from_user.__dict__
+        if data != 'Android' or data != 'iOS' or data != 'tdesktop':
+             user = query.from_user.__dict__
 
-        (command, event_id) = tuple(data.split('_'))
-        event = self.store.get_event(event_id)
+             (command, event_id) = tuple(data.split('_'))
+             event = self.store.get_event(event_id)
 
-        if not event.get('users'):
-            event['users'] = []
+             if not event.get('users'):
+                 event['users'] = []
 
-        if 'type' in event and event['type'] == 'Notícia':
-              if any(u['id'] == user['id'] for u in event['users']):
-                    if any(u['id'] == user['id'] and u['like'] == 0 for u in event['users']):
-                          user.update({'like': 0})
-                    elif any(u['id'] == user['id'] and u['like'] == 1 for u in event['users']):
-                          user.update({'like': 1})
-                    elif any(u['id'] == user['id'] and u['like'] == 2 for u in event['users']):
-                          user.update({'like': 2})
+             if 'type' in event and event['type'] == 'Notícia':
+                   if any(u['id'] == user['id'] for u in event['users']):
+                         if any(u['id'] == user['id'] and u['like'] == 0 for u in event['users']):
+                               user.update({'like': 0})
+                         elif any(u['id'] == user['id'] and u['like'] == 1 for u in event['users']):
+                               user.update({'like': 1})
+                         elif any(u['id'] == user['id'] and u['like'] == 2 for u in event['users']):
+                               user.update({'like': 2})
 
-        if 'type' in event and event['type'] == 'Esdeveniment':
-              if any(u['id'] == user['id'] for u in event['users']):
-                    if any(u['id'] == user['id'] and u['go'] == 1 for u in event['users']):
-                          user.update({'go': 1})
+             if 'type' in event and event['type'] == 'Esdeveniment':
+                   if any(u['id'] == user['id'] for u in event['users']):
+                         if any(u['id'] == user['id'] and u['go'] == 1 for u in event['users']):
+                               user.update({'go': 1})
 
-        if command == 'go':
-            event = self.toggle_user(event, user)
+             if command == 'go':
+                 event = self.toggle_user(event, user)
 
-        if command == 'like':
-            event = self.toggle_like(event, user)
+             if command == 'like':
+                 event = self.toggle_like(event, user)
 
-        if command == 'nolike':
-            event = self.toggle_nolike(event, user)
+             if command == 'nolike':
+                 event = self.toggle_nolike(event, user)
 
-        bot.editMessageText(text=create_event_message(event, user),
-                            inline_message_id=query.inline_message_id,
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard=create_keyboard(event, user)),
-                            parse_mode=ParseMode.MARKDOWN,
-			    disable_web_page_preview=True)
+             bot.editMessageText(text=create_event_message(event, user),
+                                 inline_message_id=query.inline_message_id,
+                                 reply_markup=InlineKeyboardMarkup(inline_keyboard=create_keyboard(event, user)),
+                                 parse_mode=ParseMode.MARKDOWN,
+		          	 disable_web_page_preview=True)
 
     def toggle_user(self, event, user):
         if not event.get('users'):
