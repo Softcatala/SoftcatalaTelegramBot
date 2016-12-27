@@ -7,11 +7,13 @@ from requests import get
 import requests
 import json
 
+import schedule
+
 from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
-from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater, Job
+from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater
 
 from store import TinyDBStore
 from modules.inline import InlineModule
@@ -82,58 +84,6 @@ class LangpackModule(object):
                       parse_mode='Markdown',
                       text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
 
-    def callback_test(bot, job):
-        #user_id = update.message.from_user.id
-        #if str(user_id) in allowed_users.values():
-             testfiles= 0
-             #TEST ANDROID FILE_ID
-             f= open(paths['file_ids']+"android_file_id.txt","r")
-             fandroid= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
-             output= r.json()
-             if output['ok']:
-                   testandroid= ''
-             else:
-                   testfiles+= 1
-                   testandroid= '    \U0001F6AB *Android*\n'
-             #TEST IOS FILE_ID
-             f= open(paths['file_ids']+"ios_file_id.txt","r")
-             fios= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
-             output= r.json()
-             if output['ok']:
-                   testios= ''
-             else:
-                   testfiles+= 1
-                   testios= '    \U0001F6AB *iOS*\n'
-             #TEST TELEGRAM DESKTOP FILE_ID
-             f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
-             ftdesktop= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
-             output= r.json()
-             if output['ok']:
-                   testtdesktop= ''
-             else:
-                   testfiles+= 1
-                   testtdesktop= '    \U0001F6AB *Telegram Desktop*\n'
-             if testfiles == 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
-             elif testfiles > 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
-
-    updater = Updater(params['token'])
-    j = updater.job_queue
-    job_minute = Job(callback_test, 43200.0)
-    j.put(job_minute, next_t=43200.0)
-    j.start()
-
     def platform_handler(self, bot, update):
         f= open(paths['versions']+"android_version.txt","r")
         and_version= f.read(10)
@@ -162,8 +112,6 @@ class LangpackModule(object):
             query = update.callback_query
             data = query.data	
             if data != 'Android' and data != 'iOS' and data != 'tdesktop':
-                 print (query)
-                 print (data)
                  if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
                      user = query.from_user.__dict__
                      (command, event_id) = tuple(data.split('_'))
@@ -729,3 +677,56 @@ class LangpackModule(object):
 
     def get_handlers(self):
         return self.handlers
+
+def job():
+     testfiles= 0
+     #TEST ANDROID FILE_ID
+     f= open(paths['file_ids']+"android_file_id.txt","r")
+     fandroid= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+     output= r.json()
+     if output['ok']:
+           testandroid= ''
+     else:
+           testfiles+= 1
+           testandroid= '*Android*%20'
+     #TEST IOS FILE_ID
+     f= open(paths['file_ids']+"ios_file_id.txt","r")
+     fios= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+     output= r.json()
+     if output['ok']:
+           testios= ''
+     else:
+           testfiles+= 1
+           testios= '*iOS*%20'
+     #TEST TELEGRAM DESKTOP FILE_ID
+     f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+     ftdesktop= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+     output= r.json()
+     if output['ok']:
+           testtdesktop= ''
+     else:
+           testfiles+= 1
+           testtdesktop= '*Telegram%20Desktop*%20'
+     if testfiles == 0:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=Els%20*file_id*%20dels%20tres%20fitxers%20s%C3%B3n%20correctes.%20No%20hi%20ha%20cap%20error.&parse_mode=Markdown')
+         return r
+
+     elif testfiles == 1:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27ha%20trobat%20un%20error%20al%20*file_id*%20del%20paquet%20de%20llengua%20per%20a%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
+         return r
+     elif testfiles > 1:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27han%20trobat%20' + str(testfiles) + '%20errors%20als%20*file_id*%20dels%20paquet%20de%20llengua%3A%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
+         return r
+
+schedule.every(1).minutes.do(job)
+#schedule.every().day.at("17:14").do(job)
+
+#while True:
+#    schedule.run_pending()
+#    time.sleep(1)
