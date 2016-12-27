@@ -78,6 +78,28 @@ def create_keyboard(event, user):
 
           return [buttons, []]
 
+    if event.get('type') and event['type'] == 'Projecte':
+          hearts= 0
+          if 'users' in event and len(event['users']) > 0:
+              for u in event['users']:
+                  if u['heart'] == 1:
+                       hearts += u['heart']
+
+          buttons = [
+              InlineKeyboardButton(
+                  text= str(hearts) + "\u2764\uFE0F",
+                  callback_data='heart_' + str(event.eid)
+              )
+          ]
+
+          if event.get('help'):
+              buttons.append(InlineKeyboardButton(
+                  text="\U0001F446\U0001F3FC Vull ajudar!",
+                  callback_data='help_' + str(event.eid)
+              ))
+
+          return [buttons, []]
+
     if event.get('type') and event['type'] == 'Paquets de llengua':
           if event.get('android') and event['android'] == 'NOT':
                f= open(paths['versions']+"android_version.txt","r")
@@ -182,6 +204,37 @@ def create_event_message(event, user):
 
           return message_text
 
+    if 'type' in event and event['type'] == 'Projecte':
+          message_text = "*{name}*\n".format(
+              name=event['name']
+          )
+
+          if 'description' in event:
+              message_text += '\n_' + event['description'] + '_\n\n'
+
+          if 'projecturl' in event:
+              message_text += '[Pàgina del projecte](' + event['projecturl'] + ')\n\n'
+
+          if 'help' in event and event['help'] == 'Sí':
+              message_text += 'El projecte *' + event['name'] + '* necessita ajuda. Si voleu oferir-vos per a  col·laborar en aquest projecte premeu el botó i contactarem amb vós.\n\n'
+              peoplehelp= 0
+              if 'users' in event and len(event['users']) > 0:
+                  for u in event['users']:
+                      if u['ihelp'] == 1:
+                           peoplehelp += u['ihelp']
+                  if peoplehelp > 1:
+                      message_text += '\n\U0001F465 S\'han ofert *' + str(peoplehelp) + '* persones per a ajudar en aquest projecte.\nMoltes gràcies!'
+                  elif peoplehelp == 1:
+                      message_text += '\n\U0001F464 S\'ha ofert *una* persona per a ajudar en aquest projecte.\nMoltes gràcies!'
+         #    message_text += '\n'
+         #    message_text += '\n_Assistents:_ '
+         #    for u in event['users']:
+         #        message_text += '- ' + u['first_name']
+          message_text += '\n\n'
+
+          return message_text
+
+
     if 'type' in event and event['type'] == 'Paquets de llengua':
           f= open(paths['versions']+"android_version.txt","r")
           android_date= f.read(10)
@@ -277,6 +330,29 @@ class InlineModule(object):
                          if any(u['id'] == user['id'] and u['go'] == 1 for u in event['users']):
                                user.update({'go': 1})
 
+             if 'type' in event and event['type'] == 'Projecte':
+                   if any(u['id'] == user['id'] for u in event['users']):
+                         #if any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 0 for u in event['users']):
+                         #      user.update({'heart': 0})
+                         #      user.update({'ihelp': 0})
+                         #elif any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 1 for u in event['users']):
+                         #      user.update({'heart': 0})
+                         #      user.update({'ihelp': 1})
+                         #elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 0 for u in event['users']):
+                         #      user.update({'heart': 1})
+                         #      user.update({'ihelp': 0})
+                         #elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 1 for u in event['users']):
+                         #      user.update({'heart': 1})
+                         #      user.update({'ihelp': 1})
+                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
+                               user.update({'heart': 0})
+                         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
+                               user.update({'heart': 1})
+                         if any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
+                               user.update({'ihelp': 0})
+                         elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
+                               user.update({'ihelp': 1})
+
              if command == 'go':
                  event = self.toggle_user(event, user)
 
@@ -285,6 +361,12 @@ class InlineModule(object):
 
              if command == 'nolike':
                  event = self.toggle_nolike(event, user)
+
+             if command == 'heart':
+                 event = self.toggle_heart(event, user)
+
+             if command == 'help':
+                 event = self.toggle_help(event, user)
 
              bot.editMessageText(text=create_event_message(event, user),
                                  inline_message_id=query.inline_message_id,
@@ -354,6 +436,137 @@ class InlineModule(object):
         else:
                user.update({'like': 2})
                event['users'].append(user)
+
+        self.store.update_event(event)
+        return event
+
+    def toggle_heart(self, event, user):
+        if not event.get('users'):
+            event['users'] = []
+
+        if any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 0})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 0})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 0})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 0})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 0})
+               event['users'].append(user)
+        else:
+               user.update({'heart': 1})
+               event['users'].append(user)
+
+        self.store.update_event(event)
+        return event
+
+    def toggle_help(self, event, user):
+        if not event.get('users'):
+            event['users'] = []
+
+        if any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
+        elif any(u['id'] == user['id'] and u['heart'] == 0 and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
+        elif any(u['id'] == user['id'] and u['heart'] == 1 and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
+        elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 1})
+               user.update({'ihelp': 1})
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
+        elif any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
+        elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'heart': 0})
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+        else:
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               f_name = update.message.from_user.first_name
+               username = update.message.from_user.username
+               bot.sendMessage(chat_id= chats['group'],
+                               parse_mode='Markdown',
+                               text= str(f_name) + '(' + str(username) + ') ofereix ajuda per al projecte ' + event['name'] + '.')
 
         self.store.update_event(event)
         return event

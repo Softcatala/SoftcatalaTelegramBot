@@ -79,6 +79,16 @@ FIELDS = [
         'required': False
     },
     {
+        'name': 'projecturl',
+        'message': '\u0034\u20E3 Envieu-me l\'*URL del projecte*.\n\nPodeu enviar /skip per a deixar el camp en blanc o /cancel per a cancel·lar el procés de creació de la notícia.',
+        'required': False
+    },
+    {
+        'name': 'help',
+        'message': '\u0035\u20E3 Voleu crear un botó per demanar *ajuda pel projecte*?.\n\nPer a cancel·lar el procés envieu /cancel.',
+        'required': True
+    },
+    {
         'name': 'date_version',
         'message': 'Comproveu que la data de la versió és correcta (seguint l\'ordre *dia/mes/any*) i si és així premeu el botó per a desar-la.\n\nPer a cancel·lar el procés envieu /cancel.',
         'required': True
@@ -113,7 +123,7 @@ def parse_fields(field, value):
              return error2
         else:
              if field == 'type':
-                 if value == 'Esdeveniment' or value == 'Notícia':  
+                 if value == 'Esdeveniment' or value == 'Notícia' or value == 'Projecte':  
                       return value
                  if value == 'Paquets de llengua':
                       if '"type": "Paquets de llengua"' in open(paths['posts']+'event_drafts.json').read():
@@ -121,7 +131,7 @@ def parse_fields(field, value):
                            return error3
                       else:
                            return value
-                 elif value == 'esdeveniment' or value == 'notícia':
+                 elif value == 'esdeveniment' or value == 'notícia' or value == 'projecte':
                       valuecap = value.capitalize()  
                       return valuecap
                  elif value == 'paquets de llengua':
@@ -206,6 +216,21 @@ def parse_fields(field, value):
                       assert url(value)
                       return value
                  except:
+                      error = 'error'
+                      return error
+             if field == 'projecturl':
+                 try:
+                      assert url(value)
+                      return value
+                 except:
+                      error = 'error'
+                      return error
+             if field == 'help':
+                 if value == 'Sí':
+                      return value
+                 elif value == 'No':
+                      return value
+                 else:
                       error = 'error'
                       return error
              if field == 'validate':
@@ -354,6 +379,9 @@ class CommandsModule(object):
             elif field['name'] == 'description' and event['type'] == 'Notícia':
                   current_field += 9
                   self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'description' and event['type'] == 'Projecte':
+                  current_field += 10
+                  self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'month' and event['month'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
@@ -417,6 +445,13 @@ class CommandsModule(object):
                         )
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'projecturl' and event['projecturl'] == 'error2':
+                        bot.sendMessage(
+                        update.message.chat_id,
+                        text="\u26A0\uFE0F No podeu deixar l'URL del projecte en blanc ni enviar un document. Torneu a provar-ho."
+                        )
+                        current_field += 0
+                        self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'date_version' and event['date_version'] == 'error2':
                         bot.sendMessage(
                         update.message.chat_id,
@@ -425,12 +460,15 @@ class CommandsModule(object):
                         current_field += 0
                         self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'year' and event['type'] == 'Paquets de llengua':
-                  current_field += 7
+                  current_field += 9
                   self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'eventurl' and event['eventurl'] != 'error' and event['eventurl'] != 'error2':
-                  current_field += 7
+                  current_field += 9
                   self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'newsurl' and event['newsurl'] != 'error' and event['newsurl'] != 'error2':
+                  current_field += 8
+                  self.update_draft(bot, event, user_id, update, current_field)
+            elif field['name'] == 'help' and event['help'] != 'error' and event['help'] != 'error2':
                   current_field += 6
                   self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'day' and event['day'] == 'error':
@@ -487,6 +525,22 @@ class CommandsModule(object):
                   bot.sendMessage(
                   update.message.chat_id,
                   text="\u26A0\uFE0F Sembla que l'URL per a la notícia que heu enviat no és vàlid, comproveu-lo i torneu a enviar-lo."
+                  )
+                  current_field += 0
+                  self.update_draft(bot, event, user_id, update, current_field)
+
+            elif field['name'] == 'projecturl' and event['projecturl'] == 'error':
+                  bot.sendMessage(
+                  update.message.chat_id,
+                  text="\u26A0\uFE0F Sembla que l'URL per al projecte que heu enviat no és vàlid, comproveu-lo i torneu a enviar-lo."
+                  )
+                  current_field += 0
+                  self.update_draft(bot, event, user_id, update, current_field)
+
+            elif field['name'] == 'help' and event['help'] == 'error':
+                  bot.sendMessage(
+                  update.message.chat_id,
+                  text="\u26A0\uFE0F No és gaire difícil... «Sí» o «No»."
                   )
                   current_field += 0
                   self.update_draft(bot, event, user_id, update, current_field)
@@ -670,11 +724,11 @@ class CommandsModule(object):
                 self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'eventurl':
                 event = draft['event']
-                current_field += 7
+                current_field += 9
                 self.update_draft(bot, event, user_id, update, current_field)
             elif field['name'] == 'newsurl':
                 event = draft['event']
-                current_field += 6
+                current_field += 8
                 self.update_draft(bot, event, user_id, update, current_field)
             else:
                 event = draft['event']
@@ -696,7 +750,7 @@ class CommandsModule(object):
                     text=FIELDS[current_field]['message'],
                     reply_markup=ReplyKeyboardMarkup(
                          keyboard=[
-                              ['Notícia'],['Esdeveniment'],['Paquets de llengua']
+                              ['Esdeveniment'],['Notícia'],['Paquets de llengua'],['Projecte']
                          ],
                          one_time_keyboard=True,
                          resize_keyboard=True
@@ -900,6 +954,19 @@ class CommandsModule(object):
                          resize_keyboard=True
                 ))
 
+            elif FIELDS[current_field]['name'] == 'help':
+                bot.sendMessage(
+                    update.message.chat_id,
+                    parse_mode='Markdown',
+                    text=FIELDS[current_field]['message'],
+                    reply_markup=ReplyKeyboardMarkup(
+                         keyboard=[
+                              ['Sí','No']
+                         ],
+                         one_time_keyboard=True,
+                         resize_keyboard=True
+                ))
+
             elif FIELDS[current_field]['name'] == 'date_version':
                  if int(event['day']) > 9:
                       day = event['day']
@@ -1007,7 +1074,7 @@ class CommandsModule(object):
                       bot.sendDocument(chat_id=update.message.chat_id,
                             document=tdesk_file_id)
 
-            elif FIELDS[current_field]['name'] != 'type' or FIELDS[current_field]['name'] != 'month' or FIELDS[current_field]['name'] != 'day' or FIELDS[current_field]['name'] != 'year' or FIELDS[current_field]['name'] != 'hour' or FIELDS[current_field]['name'] != 'minute' or FIELDS[current_field]['name'] != 'date' or FIELDS[current_field]['name'] != 'date_version' or FIELDS[current_field]['name'] != 'validate':
+            elif FIELDS[current_field]['name'] != 'type' or FIELDS[current_field]['name'] != 'month' or FIELDS[current_field]['name'] != 'day' or FIELDS[current_field]['name'] != 'year' or FIELDS[current_field]['name'] != 'hour' or FIELDS[current_field]['name'] != 'minute' or FIELDS[current_field]['name'] != 'date' or FIELDS[current_field]['name'] != 'date_version' or FIELDS[current_field]['name'] != 'validate' or FIELDS[current_field]['name'] != 'help':
                 bot.sendMessage(
                     update.message.chat_id,
                     parse_mode='Markdown',
@@ -1084,7 +1151,7 @@ class CommandsModule(object):
                            f.close()
                            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
                            output= r.json()
-                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/' + output['result']['file_path']
                            received= paths['local_packs'] + 'strings.xml'
                            with open(received, "wb") as file:
                                response = get(file_url)
@@ -1116,7 +1183,7 @@ class CommandsModule(object):
                            f.close()
                            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
                            output= r.json()
-                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/' + output['result']['file_path']
                            received= paths['local_packs'] + 'Localizable-ios.strings'
                            with open(received, "wb") as file:
                                response = get(file_url)
@@ -1148,7 +1215,7 @@ class CommandsModule(object):
                            f.close()
                            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
                            output= r.json()
-                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/'  + output['result']['file_path']
+                           file_url= 'https://api.telegram.org/file/bot' + params['token'] + '/' + output['result']['file_path']
                            received= paths['local_packs'] + 'tdesktop.strings'
                            with open(received, "wb") as file:
                                response = get(file_url)
@@ -1244,6 +1311,13 @@ class CommandsModule(object):
                  chat_id= chats['group'],
                  parse_mode='Markdown',
                  text= '*' + str(f_name) + '* ha creat la notícia *«' + event['name'] + '»*.'
+             )
+        elif event['type'] == 'Projecte':
+             f_name = update.message.from_user.first_name
+             bot.sendMessage(
+                 chat_id= chats['group'],
+                 parse_mode='Markdown',
+                 text= '*' + str(f_name) + '* ha creat una publicació pel projecte: *«' + event['name'] + '»*.'
              )
         self.store.insert_event(event)
         self.store.remove_draft(update.message.from_user.id)
