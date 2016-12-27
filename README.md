@@ -22,7 +22,7 @@ Installation
 
 * First, you need Python 3 (pre-installed on Ubuntu) and package manager:
 ```
-$sudo apt-get install python-pip3
+$sudo apt-get install python3-pip
 ```
 
 Copy source files to your local machine or server.
