@@ -257,7 +257,7 @@ class CommandsModule(object):
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
             CommandHandler('hello', self.hello_command),
-            MessageHandler((Filters.text | Filters.document), self.message)
+            MessageHandler([Filters.text,Filters.document], self.message)
         ]
         self.store = TinyDBStore()
 

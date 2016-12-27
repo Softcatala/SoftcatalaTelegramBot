@@ -7,18 +7,23 @@ from requests import get
 import requests
 import json
 
+import schedule
+
 from datetime import datetime
 
 from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardHide
-from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater, Job
+from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHandler, CallbackQueryHandler, Updater
+
+from store import TinyDBStore
+from modules.inline import InlineModule
 
 from config import params, allowed_users, paths, chats, inline_status
 
 
 class LangpackModule(object):
     def __init__(self):
-        self.handlers2 = [
+        self.handlers = [
             CommandHandler('start', self.download_command, pass_args=True),
             CommandHandler('baixa', self.download_command, pass_args=True),
             CommandHandler('android', self.android_command),
@@ -30,6 +35,8 @@ class LangpackModule(object):
             CallbackQueryHandler(self.platform_handler)
             #MessageHandler([Filters.text], self.message)
         ]
+        self.store = TinyDBStore()
+        self.inline = InlineModule()
 
     def testfiles_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -77,58 +84,6 @@ class LangpackModule(object):
                       parse_mode='Markdown',
                       text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
 
-    def callback_test(bot, job):
-        #user_id = update.message.from_user.id
-        #if str(user_id) in allowed_users.values():
-             testfiles= 0
-             #TEST ANDROID FILE_ID
-             f= open(paths['file_ids']+"android_file_id.txt","r")
-             fandroid= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
-             output= r.json()
-             if output['ok']:
-                   testandroid= ''
-             else:
-                   testfiles+= 1
-                   testandroid= '    \U0001F6AB *Android*\n'
-             #TEST IOS FILE_ID
-             f= open(paths['file_ids']+"ios_file_id.txt","r")
-             fios= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
-             output= r.json()
-             if output['ok']:
-                   testios= ''
-             else:
-                   testfiles+= 1
-                   testios= '    \U0001F6AB *iOS*\n'
-             #TEST TELEGRAM DESKTOP FILE_ID
-             f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
-             ftdesktop= f.read(32)
-             f.close()
-             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
-             output= r.json()
-             if output['ok']:
-                   testtdesktop= ''
-             else:
-                   testfiles+= 1
-                   testtdesktop= '    \U0001F6AB *Telegram Desktop*\n'
-             if testfiles == 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
-             elif testfiles > 0:
-                 bot.sendMessage(chats['group'],
-                      parse_mode='Markdown',
-                      text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
-
-    updater = Updater(params['token'])
-    j = updater.job_queue
-    job_minute = Job(callback_test, 43200.0)
-    j.put(job_minute, next_t=43200.0)
-    j.start()
-
     def platform_handler(self, bot, update):
         f= open(paths['versions']+"android_version.txt","r")
         and_version= f.read(10)
@@ -155,61 +110,74 @@ class LangpackModule(object):
         if update.callback_query:
         #SI LA FUNCIÓ LA TRIGA UN BOTÓ INTEGRAT (ÉS A DIR, SI EXISTEIX UN CALLBACK_QUERY).
             query = update.callback_query
-            platform_name = query.data	
+            data = query.data	
+            if data != 'Android' and data != 'iOS' and data != 'tdesktop':
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                     user = query.from_user.__dict__
+                     (command, event_id) = tuple(data.split('_'))
+                     event = self.store.get_event(event_id)
+                     self.inline.callback_handler(bot, update)
         else:
         #SI LA FUNCIÓ LA TRIGA L'ORDRE «/start argument» (ÉS A DIR, SI NO EXISTEIX UN CALLBACK_QUERY).
             query = update.message
-            platform_name = query.text
+            data = query.text
+            if data != 'Android' and data != 'iOS' and data != 'tdesktop':
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                     user = query.from_user.__dict__
+                     (command, event_id) = tuple(data.split('_'))
+                     event = self.store.get_event(event_id)
+                     self.inline.callback_handler(bot, update)
         #ACÍ HI HAURA QUE VEURE LA FORMA DE TRAURE-LI EL «/start» AL message.text.		
 
-        if platform_name == 'Android':
+        if data == 'Android':
               filepack= fandroid
               textpack= tandroid
-        elif platform_name == 'iOS':
+        elif data == 'iOS':
               filepack= fios
               textpack= tios
-        elif platform_name == 'tdesktop':
+        elif data == 'tdesktop':
               filepack= ftdesktop
               textpack= ttdesktop
 
-        bot.sendMessage(chat_id=query.message.chat_id,
-        #bot.editMessageText(chat_id=query.message.chat_id,
-                            #message_id=query.message.message_id,
-		            parse_mode='Markdown',
-                            disable_web_page_preview=True,
-                            text=textpack)
+        if data == 'Android' or data == 'iOS' or data == 'tdesktop':
+               bot.sendMessage(chat_id=query.message.chat_id,
+               #bot.editMessageText(chat_id=query.message.chat_id,
+                                   #message_id=query.message.message_id,
+		                   parse_mode='Markdown',
+                                   disable_web_page_preview=True,
+                                   text=textpack)
 
-        bot.sendDocument(chat_id=query.message.chat_id,
-                         #reply_to_message_id=query.message.message_id,
-                         document=filepack)
+               bot.sendDocument(chat_id=query.message.chat_id,
+                                #reply_to_message_id=query.message.message_id,
+                                document=filepack)
 
-        user_id = update.callback_query.from_user.id
-        today= datetime.now()
-        dayraw = today.day
-        if int(dayraw) < 10:
-           day = '0' + str(dayraw)
-        else:
-           day = str(dayraw)
-        monthraw = today.month
-        if int(monthraw) < 10:
-           month = '0' + str(monthraw)
-        else:
-           month = str(monthraw)
-        year = today.year
-        today2= day + '/' + month + '/' + str(year)
+               user_id = update.callback_query.from_user.id
+               today= datetime.now()
+               dayraw = today.day
+               if int(dayraw) < 10:
+                  day = '0' + str(dayraw)
+               else:
+                  day = str(dayraw)
+               monthraw = today.month
+               if int(monthraw) < 10:
+                  month = '0' + str(monthraw)
+               else:
+                  month = str(monthraw)
+               year = today.year
+               today2= day + '/' + month + '/' + str(year)
 
-        if platform_name == 'Android':
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + platform_name + ';bot;buttons'
-        elif platform_name == "iOS":
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + platform_name + ';bot;buttons'
-        elif platform_name == "tdesktop":
-            stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + platform_name + ';bot;buttons'
-        with open(paths['stats']+'stats.csv','a',newline='') as f:
-             writer=csv.writer(f)
-             writer.writerow([stat])
+               if data == 'Android':
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + data + ';bot;buttons'
+               elif data == "iOS":
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + data + ';bot;buttons'
+               elif data == "tdesktop":
+                   stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + data + ';bot;buttons'
+               with open(paths['stats']+'stats.csv','a',newline='') as f:
+                    writer=csv.writer(f)
+                    writer.writerow([stat])
 
-        callback_query_id=query.id
-        bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
+               callback_query_id=query.id
+               bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
 
     def getfiles_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -707,5 +675,58 @@ class LangpackModule(object):
                             parse_mode='Markdown',
                             text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
 
-    def get_handlers2(self):
-        return self.handlers2
+    def get_handlers(self):
+        return self.handlers
+
+def job():
+     testfiles= 0
+     #TEST ANDROID FILE_ID
+     f= open(paths['file_ids']+"android_file_id.txt","r")
+     fandroid= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
+     output= r.json()
+     if output['ok']:
+           testandroid= ''
+     else:
+           testfiles+= 1
+           testandroid= '*Android*%20'
+     #TEST IOS FILE_ID
+     f= open(paths['file_ids']+"ios_file_id.txt","r")
+     fios= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
+     output= r.json()
+     if output['ok']:
+           testios= ''
+     else:
+           testfiles+= 1
+           testios= '*iOS*%20'
+     #TEST TELEGRAM DESKTOP FILE_ID
+     f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
+     ftdesktop= f.read(32)
+     f.close()
+     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
+     output= r.json()
+     if output['ok']:
+           testtdesktop= ''
+     else:
+           testfiles+= 1
+           testtdesktop= '*Telegram%20Desktop*%20'
+     if testfiles == 0:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=Els%20*file_id*%20dels%20tres%20fitxers%20s%C3%B3n%20correctes.%20No%20hi%20ha%20cap%20error.&parse_mode=Markdown')
+         return r
+
+     elif testfiles == 1:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27ha%20trobat%20un%20error%20al%20*file_id*%20del%20paquet%20de%20llengua%20per%20a%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
+         return r
+     elif testfiles > 1:
+         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27han%20trobat%20' + str(testfiles) + '%20errors%20als%20*file_id*%20dels%20paquet%20de%20llengua%3A%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
+         return r
+
+schedule.every(1).minutes.do(job)
+#schedule.every().day.at("17:14").do(job)
+
+#while True:
+#    schedule.run_pending()
+#    time.sleep(1)
