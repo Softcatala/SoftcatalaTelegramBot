@@ -17,7 +17,7 @@ import schedule
 
 from modules.commands import CommandsModule
 from modules.inline import InlineModule
-from packs.langpack import LangpackModule
+from modules.langpack import LangpackModule
 
 from config import params, paths, chats
 
@@ -36,18 +36,12 @@ def load_modules(dispatcher, modules):
         for handler in module.get_handlers():
             dispatcher.add_handler(handler)
 
-def load_langpack(dispatcher, packs):
-    for langpack in packs:
-        for handler in langpack.get_handlers():
-            dispatcher.add_handler(handler)
-
 def main():
     updater = Updater(params['token'])
 
     dp = updater.dispatcher
 
-    load_langpack(dp, [LangpackModule()])
-    load_modules(dp, [CommandsModule(), InlineModule()])
+    load_modules(dp, [LangpackModule(), CommandsModule(), InlineModule()])
 
     dp.add_error_handler(error)
 
