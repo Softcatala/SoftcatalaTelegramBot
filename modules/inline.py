@@ -292,6 +292,13 @@ class InlineModule(object):
                                  parse_mode=ParseMode.MARKDOWN,
 		          	 disable_web_page_preview=True)
 
+             if 'type' in event and event['type'] == 'Notícia':
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="Heu votat la notícia.")
+             if 'type' in event and event['type'] == 'Esdeveniment':
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="Heu canviat l'assistència a l'esdeveniment.")
+
     def toggle_user(self, event, user):
         if not event.get('users'):
             event['users'] = []
