@@ -15,7 +15,7 @@ from validators import url, ValidationFailure
 
 from store import TinyDBStore
 
-from config import params, allowed_users, paths, chats
+from config import params, allowed_users, paths, chats, links
 
 FIELDS = [
     {
@@ -246,7 +246,14 @@ def parse_fields(field, value):
                   return str(tdesk_file_id)
 
 def help_command(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
+    user_id = update.message.from_user.id
+    if str(user_id) in allowed_users.values():
+           bot.sendMessage(update.message.chat_id,
+                           parse_mode='Markdown',
+                           text='Gràcies per utilitzar el *robot de Softcatalà*.\n\nUs deixem un enllaç amb instruccions detallades del seu funcionament.\n\n' + links['help'])
+    else:
+           bot.sendMessage(update.message.chat_id,
+                           text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
 
 class CommandsModule(object):
     def __init__(self):
