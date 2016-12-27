@@ -7,7 +7,8 @@ from requests import get
 import requests
 import json
 
-import schedule
+#import schedule
+#from threading import Timer
 
 from datetime import datetime
 
@@ -78,7 +79,7 @@ class LangpackModule(object):
              if testfiles == 0:
                  bot.sendMessage(update.message.from_user.id,
                       parse_mode='Markdown',
-                      text= "Els *file_id* dels tres fitxers són correctes.\nHi ha " + str(testfiles) + " errors.")
+                      text= "Els *file_id* dels tres fitxers són correctes.\nNo hi ha *cap* error.")
              elif testfiles > 0:
                  bot.sendMessage(update.message.from_user.id,
                       parse_mode='Markdown',
@@ -677,56 +678,3 @@ class LangpackModule(object):
 
     def get_handlers(self):
         return self.handlers
-
-def job():
-     testfiles= 0
-     #TEST ANDROID FILE_ID
-     f= open(paths['file_ids']+"android_file_id.txt","r")
-     fandroid= f.read(32)
-     f.close()
-     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fandroid)
-     output= r.json()
-     if output['ok']:
-           testandroid= ''
-     else:
-           testfiles+= 1
-           testandroid= '*Android*%20'
-     #TEST IOS FILE_ID
-     f= open(paths['file_ids']+"ios_file_id.txt","r")
-     fios= f.read(32)
-     f.close()
-     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + fios)
-     output= r.json()
-     if output['ok']:
-           testios= ''
-     else:
-           testfiles+= 1
-           testios= '*iOS*%20'
-     #TEST TELEGRAM DESKTOP FILE_ID
-     f= open(paths['file_ids']+"tdesktop_file_id.txt","r")
-     ftdesktop= f.read(32)
-     f.close()
-     r = requests.get('https://api.telegram.org/bot' + params['token'] + '/getFile?file_id=' + ftdesktop)
-     output= r.json()
-     if output['ok']:
-           testtdesktop= ''
-     else:
-           testfiles+= 1
-           testtdesktop= '*Telegram%20Desktop*%20'
-     if testfiles == 0:
-         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=Els%20*file_id*%20dels%20tres%20fitxers%20s%C3%B3n%20correctes.%20No%20hi%20ha%20cap%20error.&parse_mode=Markdown')
-         return r
-
-     elif testfiles == 1:
-         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27ha%20trobat%20un%20error%20al%20*file_id*%20del%20paquet%20de%20llengua%20per%20a%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
-         return r
-     elif testfiles > 1:
-         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=S%27han%20trobat%20' + str(testfiles) + '%20errors%20als%20*file_id*%20dels%20paquet%20de%20llengua%3A%20' + testandroid + testios + testtdesktop + '&parse_mode=Markdown')
-         return r
-
-schedule.every(1).minutes.do(job)
-#schedule.every().day.at("17:14").do(job)
-
-#while True:
-#    schedule.run_pending()
-#    time.sleep(1)
