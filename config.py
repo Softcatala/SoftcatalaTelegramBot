@@ -29,3 +29,7 @@ inline_status={
     ...
 }
 
+links={
+    'help': 'http://telegra.ph/Instruccions-d%C3%BAs-del-Robot-de-Softcatal%C3%A0-12-20'
+}
+

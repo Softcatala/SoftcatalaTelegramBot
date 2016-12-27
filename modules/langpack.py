@@ -19,7 +19,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHan
 from store import TinyDBStore
 from modules.inline import InlineModule
 
-from config import params, allowed_users, paths, chats, inline_status
+from config import params, allowed_users, paths, chats, inline_status, links
 
 
 class LangpackModule(object):
@@ -456,6 +456,15 @@ class LangpackModule(object):
                       with open(paths['stats']+'stats.csv','a',newline='') as f:
                           writer=csv.writer(f)
                           writer.writerow([stat])
+            elif len(args) == 1 and args[0] == 'inline-users-help':
+                  user_id = update.message.from_user.id
+                  if str(user_id) in allowed_users.values():
+                         bot.sendMessage(update.message.chat_id,
+                                         parse_mode='Markdown',
+                                         text='Gràcies per utilitzar el *robot de Softcatalà*.\n\nUs deixem un enllaç amb instruccions detallades del seu funcionament.\n\n' + links['help'])
+                  else:
+                         bot.sendMessage(update.message.chat_id,
+                                         text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
             #CHANGE INLINE STATUS
             elif len(args) == 1 and args[0] == 'change-inline-status':
                   user_id = update.message.from_user.id
