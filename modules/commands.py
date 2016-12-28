@@ -85,7 +85,7 @@ FIELDS = [
     },
     {
         'name': 'help',
-        'message': '\u0035\u20E3 Voleu crear un botó per demanar *ajuda pel projecte*?.\n\nPer a cancel·lar el procés envieu /cancel.',
+        'message': '\u0035\u20E3 Voleu crear un botó per demanar *ajuda pel projecte*?\n\nPer a cancel·lar el procés envieu /cancel.',
         'required': True
     },
     {
@@ -1337,6 +1337,18 @@ class CommandsModule(object):
                  reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
                  )
         
+        elif event['type'] == 'Projecte':
+             bot.sendMessage(
+                   update.message.chat_id,
+                   text="Ja podeu presentar el projecte.",
+                   reply_markup=ReplyKeyboardHide()
+                   )
+             bot.sendMessage(
+             update.message.chat_id,
+             text="S'ha creat la publicació",
+             reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+             )
+
         else:
             bot.sendMessage(
             update.message.chat_id,

@@ -113,7 +113,7 @@ class LangpackModule(object):
             query = update.callback_query
             data = query.data	
             if data != 'Android' and data != 'iOS' and data != 'tdesktop':
-                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ) or data.startswith( 'heart_' ) or data.startswith( 'help_' ):
                      user = query.from_user.__dict__
                      (command, event_id) = tuple(data.split('_'))
                      event = self.store.get_event(event_id)
@@ -123,7 +123,7 @@ class LangpackModule(object):
             query = update.message
             data = query.text
             if data != 'Android' and data != 'iOS' and data != 'tdesktop':
-                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ):
+                 if data.startswith( 'go_' ) or data.startswith( 'like_' ) or data.startswith( 'nolike_' ) or data.startswith( 'heart_' ) or data.startswith( 'help_' ):
                      user = query.from_user.__dict__
                      (command, event_id) = tuple(data.split('_'))
                      event = self.store.get_event(event_id)
