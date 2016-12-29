@@ -288,10 +288,10 @@ class CommandsModule(object):
             CommandHandler('skip', self.skip_command),
 	    CommandHandler('cancel', self.cancel_command),
             CommandHandler('help', help_command),
-            CommandHandler('hello', self.hello_command),
             MessageHandler([Filters.text,Filters.document], self.message)
         ]
         self.store = TinyDBStore()
+
 
     def start_command(self, bot, update, args):
         user_id = update.message.from_user.id
@@ -312,11 +312,6 @@ class CommandsModule(object):
                  bot.sendMessage(update.message.chat_id,
                              parse_mode='Markdown',
                              text= "No es permet crear publicacions des del grup.")
-
-    def hello_command(self, bot, update):
-        user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
-            bot.sendMessage(chat_id= chats['group'], text='Hello world!')
 
     def admin_command(self, bot, update):
         user_id = update.message.from_user.id

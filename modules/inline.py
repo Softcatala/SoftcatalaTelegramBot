@@ -2,7 +2,6 @@
 import base64
 import datetime
 import locale
-#import requests
 import json
 import csv
 from six.moves import urllib
@@ -14,6 +13,8 @@ from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 from store import TinyDBStore
 
 from config import params, allowed_users, paths, chats, inline_status
+
+import requests
 
 
 def create_event_payload(event):
@@ -339,12 +340,16 @@ class InlineModule(object):
                                     user.update({'ihelp': 0})
                                elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                                     user.update({'ihelp': 1})
+                               elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+                                    user.update({'ihelp': 2})
                          elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                                user.update({'heart': 1})
                                if any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
                                     user.update({'ihelp': 0})
                                elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                                     user.update({'ihelp': 1})
+                               elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+                                    user.update({'ihelp': 2})
 
              if command == 'go':
                  event = self.toggle_user(event, user)
@@ -366,16 +371,28 @@ class InlineModule(object):
                                  reply_markup=InlineKeyboardMarkup(inline_keyboard=create_keyboard(event, user)),
                                  parse_mode=ParseMode.MARKDOWN,
 		          	 disable_web_page_preview=False)
-
+ 
+             #ANSWERS (POP-UPS) TO CALLBACKS
              if 'type' in event and event['type'] == 'Notícia':
+                if any(u['id'] == user['id'] and u['like'] == 0 for u in event['users']):
                    callback_query_id=query.id
-                   bot.answerCallbackQuery(callback_query_id=query.id, text="Heu votat la notícia.")
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha eliminat el vostre vot.")
+                elif any(u['id'] == user['id'] and u['like'] == 1 for u in event['users']):
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="La notícia us \U0001F44D\U0001F3FC.")
+                elif any(u['id'] == user['id'] and u['like'] == 2 for u in event['users']):
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="La notícia us \U0001F44E\U0001F3FC.")
              if 'type' in event and event['type'] == 'Esdeveniment':
+                if any(u['id'] == user['id'] and u['go'] == 1 for u in event['users']):
                    callback_query_id=query.id
-                   bot.answerCallbackQuery(callback_query_id=query.id, text="Heu canviat l'assistència a l'esdeveniment.")
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="Assistireu a l'esdeveniment.")
+                else:
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="No assistireu a l'esdeveniment.")
              if 'type' in event and event['type'] == 'Projecte':
                 if event['help'] == 'Sí':
-                   if any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
+                   if any(u['id'] == user['id'] and u['ihelp'] != 1 for u in event['users']):
                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                              callback_query_id=query.id
                              bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \U0001F494 i no voleu participar-hi.")
@@ -474,13 +491,35 @@ class InlineModule(object):
         elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                user.update({'heart': 1})
                event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+               user.update({'heart': 1})
+               event['users'].append(user)
         else:
-               user.update({'ihelp': 0})
+               user.update({'ihelp': 2})
                user.update({'heart': 1})
                event['users'].append(user)
 
         self.store.update_event(event)
         return event
+
+    def help_group(self, event, user):
+        if user['username'] != '' and user['last_name'] != '':
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" ") + urllib.parse.quote(user['last_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
+            return r
+        elif user['username'] != '':
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
+            return r
+        else:
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. No podeu fer servir el nom d\'usuari pq no n\'utilitza. Haureu de fer-ho amb l\'ID d\'usuari: ') + str(user['id']) +'.&parse_mode=Markdown')
+            return r
+
+    def help_no(self, event, user):
+        r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + str(user['id']) + '&text=' + urllib.parse.quote("Heu marcat que no col·laborareu amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. De totes maneres, la primera vegada que s\'envia «Vull ajudar!» el missatge arriba als membres de Softcatalà. Per tant, igualment contactaran amb vós.') +'&parse_mode=Markdown')
+        return r
+
+    def help_yes(self, event, user):
+        r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + str(user['id']) + '&text=' + urllib.parse.quote("Anteriorment ja havíeu demanat col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*, per tant els membres de Softcatalà hauran rebut el vostre «Vull ajudar!» i igualment contactaran amb vós. Moltes gràcies.') +'&parse_mode=Markdown')
+        return r
 
     def toggle_help(self, event, user):
         if not event.get('users'):
@@ -490,42 +529,30 @@ class InlineModule(object):
                event['users'].remove(user)
                user.update({'ihelp': 1})
                event['users'].append(user)
+               self.help_yes(event, user)
         elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                event['users'].remove(user)
                user.update({'ihelp': 0})
                event['users'].append(user)
+               self.help_no(event, user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               self.help_group(event, user)
         elif any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                user.update({'ihelp': 1})
                event['users'].append(user)
+               self.help_yes(event, user)
         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                user.update({'ihelp': 1})
                event['users'].append(user)
+               self.help_yes(event, user)
         else:
                user.update({'heart': 0})
                user.update({'ihelp': 1})
                event['users'].append(user)
-               #r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=Un%20usuari%20us%20vol%20ajudar%20al%20projecte&parse_mode=Markdown')
-               #return r
-
-        #if any(f['id'] == friend['id'] and f['ihelp'] == 1 for f in event['friends']):
-               #event['friends'].remove(friend)
-               #friend.update({'ihelp': 1})
-               #event['friends'].append(friend)
-               #f_name = update.callback_query.from_user.first_name
-               #bot.sendMessage(chat_id=update.callback_query.message.chat_id,
-               #                parse_mode='Markdown',
-               #                text= 'Moltes gràcies ' +str(f_name) + ', ja hem rebut la teva oferta d\'ajuda. Contactarem amb tu.')
-               #hello=0
-        #else:
-               #friend.update({'ihelp': 1})
-               #event['friends'].append(friend)
-               #user_id = update.callback_query.from_user.id
-               #f_name = update.callback_query.from_user.first_name
-               #username = update.callback_query.from_user.username
-               #bot.sendMessage(chat_id= chats['group'],
-               #                parse_mode='Markdown',
-               #                text= str(f_name) + '(' + str(username) + 'amb l\ID: ' + str(user_id) +') ofereix ajuda per al projecte ' + event['name'] + '.')
-               #                text= 'Un usuari us vol ajudar al projecte ' + event['name'] + '.')
+               self.help_group(event, user)
 
         self.store.update_event(event)
         return event
