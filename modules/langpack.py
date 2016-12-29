@@ -174,8 +174,15 @@ class LangpackModule(object):
                     writer=csv.writer(f)
                     writer.writerow([stat])
 
-               callback_query_id=query.id
-               bot.answerCallbackQuery(callback_query_id=query.id, text="S'ha enviat el paquet.")
+               if data == 'Android':
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="\U0001F4E6 S'ha enviat el paquet per a Android.")
+               elif data == 'iOS':
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="\U0001F4E6 S'ha enviat el paquet per a iOS.")
+               elif data == 'tdesktop':
+                   callback_query_id=query.id
+                   bot.answerCallbackQuery(callback_query_id=query.id, text="\U0001F4E6 S'ha enviat el paquet per a Telegram Desktop.")
 
     def getfiles_command(self, bot, update):
         user_id = update.message.from_user.id
