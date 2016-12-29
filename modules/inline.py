@@ -2,7 +2,6 @@
 import base64
 import datetime
 import locale
-#import requests
 import json
 import csv
 from six.moves import urllib
@@ -14,6 +13,7 @@ from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 from store import TinyDBStore
 
 from config import params, allowed_users, paths, chats, inline_status
+
 
 
 def create_event_payload(event):
@@ -339,12 +339,16 @@ class InlineModule(object):
                                     user.update({'ihelp': 0})
                                elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                                     user.update({'ihelp': 1})
+                               elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+                                    user.update({'ihelp': 2})
                          elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                                user.update({'heart': 1})
                                if any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
                                     user.update({'ihelp': 0})
                                elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                                     user.update({'ihelp': 1})
+                               elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+                                    user.update({'ihelp': 2})
 
              if command == 'go':
                  event = self.toggle_user(event, user)
@@ -375,7 +379,7 @@ class InlineModule(object):
                    bot.answerCallbackQuery(callback_query_id=query.id, text="Heu canviat l'assistència a l'esdeveniment.")
              if 'type' in event and event['type'] == 'Projecte':
                 if event['help'] == 'Sí':
-                   if any(u['id'] == user['id'] and u['ihelp'] == 0 for u in event['users']):
+                   if any(u['id'] == user['id'] and u['ihelp'] != 1 for u in event['users']):
                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                              callback_query_id=query.id
                              bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \U0001F494 i no voleu participar-hi.")
@@ -474,13 +478,37 @@ class InlineModule(object):
         elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                user.update({'heart': 1})
                event['users'].append(user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+               user.update({'heart': 1})
+               event['users'].append(user)
         else:
-               user.update({'ihelp': 0})
+               user.update({'ihelp': 2})
                user.update({'heart': 1})
                event['users'].append(user)
 
         self.store.update_event(event)
         return event
+
+    #def help_group(self, bot, update, event, user):
+         #user_id = update.callback_query.from_user.id
+         #f_name = update.callback_query.from_user.first_name
+         #username = update.callback_query.from_user.username
+         #bot.sendMessage(chat_id= chats['group'],
+         #                parse_mode='Markdown',
+         #                text= str(f_name) + '(' + str(username) + 'amb l\ID: ' + str(user_id) +') ofereix ajuda per al projecte ' + event['name'] + '.')
+         #                text= 'Un usuari us vol ajudar al projecte ' + event['name'] + '.')
+
+    #def help_no(self, bot, update, event, user):
+        #f_name = update.callback_query.from_user.first_name
+        #bot.sendMessage(chat_id=update.callback_query.message.chat_id,
+        #                parse_mode='Markdown',
+        #                text= 'Encara que deixeu d\'oferir ajuda, l\'oferiment ja s\'ha enviat i no es pot desfer aquesta acció')
+
+    #def help_yes(self, bot, update, event, user):
+        #f_name = update.callback_query.from_user.first_name
+        #bot.sendMessage(chat_id=update.callback_query.message.chat_id,
+        #                parse_mode='Markdown',
+        #                text= 'Moltes gràcies ' +str(f_name) + ', ja hem rebut la teva oferta d\'ajuda. Contactarem amb tu.')
 
     def toggle_help(self, event, user):
         if not event.get('users'):
@@ -490,42 +518,30 @@ class InlineModule(object):
                event['users'].remove(user)
                user.update({'ihelp': 1})
                event['users'].append(user)
+               #self.help_yes(bot, update, event, user)
         elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                event['users'].remove(user)
                user.update({'ihelp': 0})
                event['users'].append(user)
+               #self.help_no(bot, update, event, user)
+        elif any(u['id'] == user['id'] and u['ihelp'] == 2 for u in event['users']):
+               event['users'].remove(user)
+               user.update({'ihelp': 1})
+               event['users'].append(user)
+               #self.help_group(bot, update, event, user)
         elif any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                user.update({'ihelp': 1})
                event['users'].append(user)
+               #self.help_yes(bot, update)
         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                user.update({'ihelp': 1})
                event['users'].append(user)
+               #self.help_yes(bot, update, event, user)
         else:
                user.update({'heart': 0})
                user.update({'ihelp': 1})
                event['users'].append(user)
-               #r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=Un%20usuari%20us%20vol%20ajudar%20al%20projecte&parse_mode=Markdown')
-               #return r
-
-        #if any(f['id'] == friend['id'] and f['ihelp'] == 1 for f in event['friends']):
-               #event['friends'].remove(friend)
-               #friend.update({'ihelp': 1})
-               #event['friends'].append(friend)
-               #f_name = update.callback_query.from_user.first_name
-               #bot.sendMessage(chat_id=update.callback_query.message.chat_id,
-               #                parse_mode='Markdown',
-               #                text= 'Moltes gràcies ' +str(f_name) + ', ja hem rebut la teva oferta d\'ajuda. Contactarem amb tu.')
-               #hello=0
-        #else:
-               #friend.update({'ihelp': 1})
-               #event['friends'].append(friend)
-               #user_id = update.callback_query.from_user.id
-               #f_name = update.callback_query.from_user.first_name
-               #username = update.callback_query.from_user.username
-               #bot.sendMessage(chat_id= chats['group'],
-               #                parse_mode='Markdown',
-               #                text= str(f_name) + '(' + str(username) + 'amb l\ID: ' + str(user_id) +') ofereix ajuda per al projecte ' + event['name'] + '.')
-               #                text= 'Un usuari us vol ajudar al projecte ' + event['name'] + '.')
+               #self.help_group(bot, update, event, user)
 
         self.store.update_event(event)
         return event

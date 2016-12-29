@@ -7,9 +7,6 @@ from requests import get
 import requests
 import json
 
-#import schedule
-#from threading import Timer
-
 from datetime import datetime
 
 from parsedatetime import parsedatetime
