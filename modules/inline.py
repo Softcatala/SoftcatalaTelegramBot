@@ -491,7 +491,7 @@ class InlineModule(object):
         return event
 
     def help_group(self, event, user):
-        r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol vol·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
+        r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
         return r
 
     def help_no(self, event, user):
