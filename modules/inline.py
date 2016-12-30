@@ -510,8 +510,9 @@ class InlineModule(object):
             r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
             return r
         else:
-            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. No podeu fer servir el nom d\'usuari pq no n\'utilitza. Haureu de fer-ho amb l\'ID d\'usuari: ') + str(user['id']) +'.&parse_mode=Markdown')
-            return r
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. No podeu fer servir el nom d\'usuari pq no n\'utilitza. Haureu de fer-ho amb l\'ID d\'usuari: ') + str(user['id']) + urllib.parse.quote('.\nPer a facilitar-vos la feina us envio l\'ID d\'usuari en un altre missatge que podreu reenviar al robot') +'.&parse_mode=Markdown')
+            q = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + str(user['id']) +'&parse_mode=Markdown')
+            return r,q
 
     def help_no(self, event, user):
         r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + str(user['id']) + '&text=' + urllib.parse.quote("Heu marcat que no col·laborareu amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. De totes maneres, la primera vegada que s\'envia «Vull ajudar!» el missatge arriba als membres de Softcatalà. Per tant, igualment contactaran amb vós.') +'&parse_mode=Markdown')

@@ -316,8 +316,9 @@ class CommandsModule(object):
     def admin_command(self, bot, update):
         user_id = update.message.from_user.id
         if str(user_id) in allowed_users.values():
+            f_name = update.message.from_user.first_name
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
-                        text="Sou administrador i podeu utilitzar les comandes:\n\n/post\n/stats\n/getfiles\n/testfiles\n/hello\n\nI per ara ja està",
+                        text= f_name + ", sou administrador i podeu utilitzar les comandes:\n\n\U0001F4DD *Publicar* (crear esdeveniments, notícies, projectes i actualitzar paquets): /post\n\n\U0001F4C8 *Estadístiques* (resum estadístic i rebre el fitxer): /stats\n\n\U0001F5C3 *Baixar paquets* desats en local: /getfiles\n\n*\U0001F50D Comprovar els paquets* desats al servidor de Telegram amb ID de fitxer: /testfiles\n\n\u00A9 Softcatalà, 2016",
                         reply_markup=ReplyKeyboardHide())
         else:
             f_name = update.message.from_user.first_name
