@@ -674,11 +674,49 @@ class LangpackModule(object):
             downtdesk2= round(downtdesk1,2)
             downtdesk3= str(downtdesk2)
             downtdesk4= downtdesk3.replace('.',',')
+
+            f = open(paths['stats']+"stats.csv", "r")
+            downbot = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "bot":
+                           downbot += 1
+            f.close()
+            f = open(paths['stats']+"stats.csv", "r")
+            downbotco = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "bot" and line.split(';')[5].rstrip() == "command":
+                           downbotco += 1
+            f.close()
+            f = open(paths['stats']+"stats.csv", "r")
+            downbotbu = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "bot" and line.split(';')[5].rstrip() == "buttons":
+                           downbotbu += 1
+            f.close()
+            f = open(paths['stats']+"stats.csv", "r")
+            downbotin = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "bot" and line.split(';')[5].rstrip() == "inline":
+                           downbotin += 1
+            f.close()
+            f = open(paths['stats']+"stats.csv", "r")
+            downchannel = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "channel":
+                           downchannel += 1
+            f.close()
+            f = open(paths['stats']+"stats.csv", "r")
+            downweb = 0
+            for line in f:
+                  if line.split(';')[4].rstrip() == "web":
+                           downweb += 1
+            f.close()
+
             bot.sendMessage(update.message.chat_id,
                             parse_mode='Markdown',
                             disable_web_page_preview=True,
-                            text= "\U0001F4C8 *Estadístiques del bot*\n\nTotal: *" + str(total) + "* baixades.\n\n\U0001F4E6 Android: *" +str(downand)+ "* baixades (_" + downand4+ "%_)\n\U0001F4E6 iOS: *" +str(downios)+ "* baixades (_" +downios4+ "%_)\n\U0001F4E6 Telegram Desktop: *" +str(downtdesk)+ "* baixades (_" +downtdesk4+ "%_)\n\nA continuació us envio el fitxer *stats.csv* amb la taula de dades."
-            )
+                            text= "\U0001F4C8 *Estadístiques del bot*\n\nTotal: *" + str(total) + "* baixades.\n\n_Per plataforma:_\n\U0001F4E6 Android: *" +str(downand)+ "* baixades (_" + downand4+ "%_)\n\U0001F4E6 iOS: *" +str(downios)+ "* baixades (_" +downios4+ "%_)\n\U0001F4E6 Telegram Desktop: *" +str(downtdesk)+ "* baixades (_" +downtdesk4+ "%_).\n\n_Per mitjà:_\n\U0001F916 Bot: *" +str(downbot)+ "*\n       1.Comandes: *" +str(downbotco)+ "*\n       2.Botons (start): *" +str(downbotbu)+ "*\n       3.Inline: *" +str(downbotin) + "*\n\U0001F4E2 Canal: *" +str(downchannel)+ "*\n\U0001F5A5 Web (Rebost): *" +str(downweb)+ "*\n\nA continuació us envio el fitxer *stats.csv* amb la taula de dades."
+                            )
             stats_file= open(paths['stats']+'stats.csv', 'rb')
             bot.sendDocument(update.message.chat_id,
                              document=stats_file) 
