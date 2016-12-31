@@ -9,7 +9,7 @@ from datetime import datetime
 
 from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ChosenInlineResult, ParseMode, \
     InputTextMessageContent, InputMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
-from telegram.ext import InlineQueryHandler, CallbackQueryHandler
+from telegram.ext import InlineQueryHandler, CallbackQueryHandler, ChosenInlineResultHandler
 
 from store import TinyDBStore
 
@@ -152,52 +152,6 @@ def format_date(param):
     timestamp = int(param)
     date = datetime.datetime.fromtimestamp(timestamp)
     return date.strftime("%A, %d %B %Y a les %H.%M hores")
-
-def inline_stats(update, pack, user_id):
-    f= open(paths['versions']+"android_version.txt","r")
-    and_version= f.read(10)
-    f.close()
-    f= open(paths['versions']+"ios_version.txt","r")
-    ios_version= f.read(10)
-    f.close()
-    f= open(paths['versions']+"tdesktop_version.txt","r")
-    tdesk_version= f.read(10)
-    f.close()
-    today= datetime.now()
-    dayraw = today.day
-    if int(dayraw) < 10:
-       day = '0' + str(dayraw)
-    else:
-       day = str(dayraw)
-    monthraw = today.month
-    if int(monthraw) < 10:
-       month = '0' + str(monthraw)
-    else:
-       month = str(monthraw)
-    year = today.year
-    today2= day + '/' + month + '/' + str(year)
-    if update.chosen_inline_result:
-      if update.chosen_inline_result.result_id == '1':
-        message_text= 'Android'
-        print (message_text)
-        stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + message_text + ';bot;inline'
-        with open(paths['stats']+'stats.csv','a',newline='') as f:
-            writer=csv.writer(f)
-            writer.writerow([stat])
-      elif update.chosen_inline_result.result_id == '2':
-        message_text= 'iOS'
-        print (message_text)
-        stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + message_text + ';bot;inline'
-        with open(paths['stats']+'stats.csv','a',newline='') as f:
-            writer=csv.writer(f)
-            writer.writerow([stat])
-      elif update.chosen_inline_result.result_id == '3':
-        message_text= 'tdesktop'
-        print (message_text)
-        stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + message_text + ';bot;inline'
-        with open(paths['stats']+'stats.csv','a',newline='') as f:
-            writer=csv.writer(f)
-            writer.writerow([stat])
 
 def create_event_message(event, user):
     if 'type' in event and event['type'] == 'Esdeveniment':
@@ -343,9 +297,55 @@ class InlineModule(object):
     def __init__(self):
         self.handlers = [
             InlineQueryHandler(self.inline_query),
-            CallbackQueryHandler(self.callback_handler)
+            CallbackQueryHandler(self.callback_handler),
+            ChosenInlineResultHandler(self.inline_stats)
         ]
         self.store = TinyDBStore()
+
+    def inline_stats(self, bot, update):
+        f= open(paths['versions']+"android_version.txt","r")
+        and_version= f.read(10)
+        f.close()
+        f= open(paths['versions']+"ios_version.txt","r")
+        ios_version= f.read(10)
+        f.close()
+        f= open(paths['versions']+"tdesktop_version.txt","r")
+        tdesk_version= f.read(10)
+        f.close()
+        today= datetime.now()
+        dayraw = today.day
+        if int(dayraw) < 10:
+           day = '0' + str(dayraw)
+        else:
+           day = str(dayraw)
+        monthraw = today.month
+        if int(monthraw) < 10:
+           month = '0' + str(monthraw)
+        else:
+           month = str(monthraw)
+        year = today.year
+        today2= day + '/' + month + '/' + str(year)
+        if update.chosen_inline_result:
+            selected= update.chosen_inline_result.result_id
+            user_id = update.chosen_inline_result.from_user.id
+            if selected == '1':
+                 platform= 'Android'
+                 stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + platform + ';bot;inline'
+                 with open(paths['stats']+'stats.csv','a',newline='') as f:
+                     writer=csv.writer(f)
+                     writer.writerow([stat])
+            elif selected == '2':
+                 platform= 'iOS'
+                 stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + platform + ';bot;inline'
+                 with open(paths['stats']+'stats.csv','a',newline='') as f:
+                     writer=csv.writer(f)
+                     writer.writerow([stat])
+            elif selected == '3':
+                 platform= 'tdesktop'
+                 stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + platform + ';bot;inline'
+                 with open(paths['stats']+'stats.csv','a',newline='') as f:
+                     writer=csv.writer(f)
+                     writer.writerow([stat])
 
     def callback_handler(self, bot, update):
         query = update.callback_query
@@ -648,8 +648,8 @@ class InlineModule(object):
                                                                document_file_id=pack['cached_id'],
                                                                description=pack['description'],
                                                                caption=pack['howto'],
-                                                               input_message_content=InputTextMessageContent(
-                                                                    inline_stats(update, pack, user_id))
+                                                               #input_message_content=InputTextMessageContent(
+                                                               #     inline_stats(update, pack, user_id))
                                                                )
                       results.append(result)
 
