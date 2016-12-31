@@ -175,10 +175,7 @@ def create_event_message(event, user):
                   message_text += '\n\U0001F465 Hi assistiran *' + str(peoplego) + '* persones.'
               elif peoplego == 1:
                   message_text += '\n\U0001F464 Hi assistirà *una* persona.'
-         #    message_text += '\n'
-         #    message_text += '\n_Assistents:_ '
-         #    for u in event['users']:
-         #        message_text += '- ' + u['first_name']
+
           message_text += '\n\n'
 
           return message_text
@@ -190,12 +187,6 @@ def create_event_message(event, user):
 
           if 'description' in event:
               message_text += '_' + event['description'] + '_\n'
-
-         #if 'users' in event and len(event['users']) > 0:
-         #    message_text += '\nVotació: \n'
-         #    for u in event['users']:
-         #        message_text += u['first_name']
-         #        message_text += str(u['like']) + '\n'
 
           message_text += '\n'
 
@@ -223,10 +214,7 @@ def create_event_message(event, user):
                       message_text += '\n\U0001F465 S\'han ofert *' + str(peoplehelp) + '* persones per a ajudar en aquest projecte.\nMoltes gràcies!'
                   elif peoplehelp == 1:
                       message_text += '\n\U0001F464 S\'ha ofert *una* persona per a ajudar en aquest projecte.\nMoltes gràcies!'
-         #    message_text += '\n'
-         #    message_text += '\n_Assistents:_ '
-         #    for u in event['users']:
-         #        message_text += '- ' + u['first_name']
+
           message_text += '\n\n'
 
           return message_text
@@ -614,6 +602,7 @@ class InlineModule(object):
                   events = self.store.get_events(user_id, query)
 
                   for event in events:
+
                       keyboard = create_keyboard(event, user)
                       result = InlineQueryResultArticle(id=event.eid,
                                                         title=event['name'],
@@ -636,7 +625,6 @@ class InlineModule(object):
                       is_personal=True
                   )
 
-        #elif str(user_id) in allowed_users.values() and inline_status[str(user_id)] == 'normal':
                 elif field == str(user_id) + '_normal':
                   results = []
                   packs = self.store.get_packs(query)
@@ -648,8 +636,6 @@ class InlineModule(object):
                                                                document_file_id=pack['cached_id'],
                                                                description=pack['description'],
                                                                caption=pack['howto'],
-                                                               #input_message_content=InputTextMessageContent(
-                                                               #     inline_stats(update, pack, user_id))
                                                                )
                       results.append(result)
 
