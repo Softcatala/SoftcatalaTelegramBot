@@ -316,19 +316,19 @@ class InlineModule(object):
         if update.chosen_inline_result:
             selected= update.chosen_inline_result.result_id
             user_id = update.chosen_inline_result.from_user.id
-            if selected == '1':
+            if selected == '77777777':
                  platform= 'Android'
                  stat= today2 + ';user#id' + str(user_id) + ';' + str(and_version) + ';' + platform + ';bot;inline'
                  with open(paths['stats']+'stats.csv','a',newline='') as f:
                      writer=csv.writer(f)
                      writer.writerow([stat])
-            elif selected == '2':
+            elif selected == '88888888':
                  platform= 'iOS'
                  stat= today2 + ';user#id' + str(user_id) + ';' + str(ios_version) + ';' + platform + ';bot;inline'
                  with open(paths['stats']+'stats.csv','a',newline='') as f:
                      writer=csv.writer(f)
                      writer.writerow([stat])
-            elif selected == '3':
+            elif selected == '99999999':
                  platform= 'tdesktop'
                  stat= today2 + ';user#id' + str(user_id) + ';' + str(tdesk_version) + ';' + platform + ';bot;inline'
                  with open(paths['stats']+'stats.csv','a',newline='') as f:
