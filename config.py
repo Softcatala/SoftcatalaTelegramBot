@@ -9,6 +9,10 @@ params={
     'token': 'YOUR_TOKEN'
 }
 
+function={
+    'production': False\True
+}
+
 paths={
     'stats': 'data/stats/',
     'versions': 'data/versions/',

@@ -15,7 +15,7 @@ from validators import url, ValidationFailure
 
 from store import TinyDBStore
 
-from config import params, allowed_users, paths, chats, links
+from config import params, allowed_users, paths, chats, links, function
 
 FIELDS = [
     {
@@ -272,13 +272,13 @@ def parse_fields(field, value):
 
 def help_command(bot, update):
     user_id = update.message.from_user.id
-    if str(user_id) in allowed_users.values():
+    if str(user_id) in allowed_users.values() or function['production']:
            bot.sendMessage(update.message.chat_id,
                            parse_mode='Markdown',
                            text='Gràcies per utilitzar el *robot de Softcatalà*.\n\nUs deixem un enllaç amb instruccions detallades del seu funcionament.\n\n' + links['help'])
     else:
            bot.sendMessage(update.message.chat_id,
-                           text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
+                           text='Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.')
 
 class CommandsModule(object):
     def __init__(self):
@@ -304,10 +304,14 @@ class CommandsModule(object):
         else:
             f_name = update.message.from_user.first_name
             chat= str(update.message.chat_id)
-            if chat != chats['group']:
+            if not function['production'] and chat != chats['group']:
                  bot.sendMessage(update.message.chat_id,
                              parse_mode='Markdown',
-                             text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+                             text= "Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.")
+            elif function['production'] and chat != chats['group']:
+                 bot.sendMessage(update.message.chat_id,
+                             parse_mode='Markdown',
+                             text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.")
             else:
                  bot.sendMessage(update.message.chat_id,
                              parse_mode='Markdown',
@@ -315,23 +319,28 @@ class CommandsModule(object):
 
     def admin_command(self, bot, update):
         user_id = update.message.from_user.id
+        f_name = update.message.from_user.first_name
         if str(user_id) in allowed_users.values():
-            f_name = update.message.from_user.first_name
             bot.sendMessage(update.message.chat_id,parse_mode='Markdown',
                         text= f_name + ", sou administrador i podeu utilitzar les comandes:\n\n\U0001F4DD *Publicar* (crear esdeveniments, notícies, projectes i actualitzar paquets): /post\n\n\U0001F4C8 *Estadístiques* (resum estadístic i rebre el fitxer): /stats\n\n\U0001F5C3 *Baixar paquets* desats en local: /getfiles\n\n*\U0001F50D Comprovar els paquets* desats al servidor de Telegram amb ID de fitxer: /testfiles\n\n\u00A9 Softcatalà, 2016",
                         reply_markup=ReplyKeyboardHide())
         else:
-            f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                        parse_mode='Markdown',
-                        text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            if function['production']:
+                bot.sendMessage(update.message.chat_id,
+                            parse_mode='Markdown',
+                            text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.")
+            else:
+                bot.sendMessage(update.message.chat_id,
+                            parse_mode='Markdown',
+                            text= "Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.")
 
     def message(self, bot, update):
         user_id = update.message.from_user.id
         text = update.message.text
+        chat= str(update.message.chat_id)
         draft = self.store.get_draft(user_id)
 
-        if draft:
+        if draft and chat != chats['group']:
             event = draft['event']
             current_field = draft['current_field']
             field = FIELDS[current_field]
@@ -563,8 +572,7 @@ class CommandsModule(object):
                   elif file_name == 'strings.xml':
                         bot.sendMessage(
                         update.message.chat_id,
-                        parse_mode='Markdown',
-                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Android anomenat strings.xml amb l'identificador _" + file_id + "_."
+                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Android anomenat strings.xml amb l'identificador " + file_id + "."
                         )
                         f=open(paths['file_ids']+'draft_and_file_id.txt','w')
                         f.write(file_id)
@@ -591,8 +599,7 @@ class CommandsModule(object):
                   elif file_name == 'Localizable-ios.strings':
                         bot.sendMessage(
                         update.message.chat_id,
-                        parse_mode='Markdown',
-                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a iOS anomenat Localizable-ios.strings amb l'identificador _" + file_id + "_."
+                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a iOS anomenat Localizable-ios.strings amb l'identificador " + file_id + "."
                         )
                         f=open(paths['file_ids']+'draft_ios_file_id.txt','w')
                         f.write(file_id)
@@ -619,8 +626,7 @@ class CommandsModule(object):
                   elif file_name == 'tdesktop.strings':
                         bot.sendMessage(
                         update.message.chat_id,
-                        parse_mode='Markdown',
-                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Telegram Desktop anomenat tdesktop.strings amb l'identificador _" + file_id + "_."
+                        text="\U0001F4E5 S'ha desat el fitxer de paquet de llengua per a Telegram Desktop anomenat tdesktop.strings amb l'identificador " + file_id + "."
                         )
                         f=open(paths['file_ids']+'draft_tdesk_file_id.txt','w')
                         f.write(file_id)
@@ -646,6 +652,13 @@ class CommandsModule(object):
                  text="\U0001F914 No entenc el que em voleu dir, però sóc un robot \U0001F916 i encara no sóc en funcionament. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.",
                  reply_markup=ReplyKeyboardHide()
                  )
+            #else:
+                 #bot.sendMessage(
+                 #update.message.chat_id,
+                 #parse_mode='Markdown',
+                 #text="Per acabar la vostra publicació, torneu al xat que teniu obert amb el robot.",
+                 #reply_markup=ReplyKeyboardHide()
+                 #)
 
     def cancel_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -659,11 +672,25 @@ class CommandsModule(object):
             reply_markup=ReplyKeyboardHide()
             )
         else:
-            bot.sendMessage(
-            update.message.chat_id,
-            text="\u26A0\uFE0F No hi ha res a cancel·lar.\nAquesta comanda només funciona quan s'ha iniciat la creació d'una publicació.",
-            reply_markup=ReplyKeyboardHide()
-        )
+            if str(user_id) in allowed_users.values():
+                bot.sendMessage(
+                update.message.chat_id,
+                text="\u26A0\uFE0F No hi ha res a cancel·lar.\nAquesta comanda només funciona quan s'ha iniciat la creació d'una publicació.",
+                reply_markup=ReplyKeyboardHide()
+            )
+            elif function['production']:
+                f_name = update.message.from_user.first_name
+                bot.sendMessage(
+                update.message.chat_id,
+                text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+                reply_markup=ReplyKeyboardHide()
+            )
+            else:
+                bot.sendMessage(
+                update.message.chat_id,
+                text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+                reply_markup=ReplyKeyboardHide()
+            )
 
     def skip_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -732,8 +759,25 @@ class CommandsModule(object):
                 self.update_draft(bot, event, user_id, update, current_field)
 
         else:
-            bot.sendMessage(update.message.chat_id,
-                            text="\u26A0\uFE0F Aquesta ordre només té sentit si s'està creant una publicació i es vol deixar en blanc un camp que no és necessari.")
+            if str(user_id) in allowed_users.values():
+                bot.sendMessage(
+                update.message.chat_id,
+                text="\u26A0\uFE0F Aquesta ordre només té sentit si s'està creant una publicació i es vol deixar en blanc un camp que no és necessari.",
+                reply_markup=ReplyKeyboardHide()
+            )
+            elif function['production']:
+                f_name = update.message.from_user.first_name
+                bot.sendMessage(
+                update.message.chat_id,
+                text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+                reply_markup=ReplyKeyboardHide()
+            )
+            else:
+                bot.sendMessage(
+                update.message.chat_id,
+                text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+                reply_markup=ReplyKeyboardHide()
+            )
 
     def update_draft(self, bot, event, user_id, update, current_field):
         self.store.update_draft(user_id, event, current_field)
@@ -1289,17 +1333,18 @@ class CommandsModule(object):
                       f= open(paths['versions']+"tdesktop_version.txt","r")
                       tdesk_version= f.read(10)
                       f.close()
-                      inline_json= '{"_default": {"77777777": {"what": "pack", "description": "Paquet català per al Telegram per Android. Versió: ' + and_version + '.", "cached_id": "' + and_file_id + '", "howto": "Baixeu el fitxer, toqueu sobre el símbol «⋮», a la part superior dreta del fitxer, i seleccioneu «Apply Localization file».", "name": "Android"}, "88888888": {"what": "pack", "description": "Paquet català per al Telegram per iOS. Versió: ' + ios_version + '.", "cached_id": "' + ios_file_id + '", "howto": "Baixeu el fitxer, toqueu sobre ell i seleccioneu «Apply Localization».", "name": "iOS"}, "99999999": {"what": "pack", "description": "Paquet català per al Telegram per Telegram Desktop. Versió: ' + tdesk_version + '.", "cached_id": "' + tdesk_file_id + '", "howto": "Baixeu el fitxer a l\'ordinador, aneu a la configuració del Telegram i escriviu «loadlang». S\'obrirà un menú: trieu el paquet de llengua que heu baixat i reinicieu el Telegram.", "name": "Telegram Desktop"}}}'
+                      inline_json= '{"_default": {"77777777": {"what": "pack", "description": "Paquet català per al Telegram per Android. Versió: ' + and_version + '.", "cached_id": "' + and_file_id + '", "howto": "Baixeu el fitxer, toqueu sobre el símbol «⋮», a la part superior dreta del fitxer, i seleccioneu «Apply Localization file».", "name": "Android"}, "88888888": {"what": "pack", "description": "Paquet català per al Telegram per iOS. Versió: ' + ios_version + '.", "cached_id": "' + ios_file_id + '", "howto": "Baixeu el fitxer, toqueu-hi a sobre i seleccioneu «Apply Localization».", "name": "iOS"}, "99999999": {"what": "pack", "description": "Paquet català per al Telegram per Telegram Desktop. Versió: ' + tdesk_version + '.", "cached_id": "' + tdesk_file_id + '", "howto": "Baixeu el fitxer a l\'ordinador, aneu a la configuració del Telegram i escriviu «loadlang». S\'obrirà un menú: trieu el paquet de llengua que heu baixat i reinicieu el Telegram. Cal conservar el fitxer!", "name": "Telegram Desktop"}}}'
                       f=open(paths['posts']+'packs.json','w')
                       f.write(inline_json)
                       f.close()
 
         elif event['type'] == 'Esdeveniment':
              f_name = update.message.from_user.first_name
+             lower_month= event['month'].lower()
              bot.sendMessage(
                  chat_id= chats['group'],
                  parse_mode='Markdown',
-                 text= '*' + str(f_name) + '* ha creat l\'esdeveniment *«' + event['name'] + '»* amb data ' + event['day'] + ' de ' + event['month'] + ' de ' + event['year'] + '.'
+                 text= '*' + str(f_name) + '* ha creat l\'esdeveniment *«' + event['name'] + '»* amb data ' + event['day'] + ' de ' + lower_month + ' de ' + event['year'] + '.'
              )
         elif event['type'] == 'Notícia':
              f_name = update.message.from_user.first_name

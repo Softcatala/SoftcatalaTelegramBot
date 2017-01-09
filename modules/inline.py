@@ -5,7 +5,6 @@ import locale
 import json
 import csv
 from six.moves import urllib
-from datetime import datetime
 
 from telegram import InlineQueryResultArticle, InlineQueryResultCachedDocument, ChosenInlineResult, ParseMode, \
     InputTextMessageContent, InputMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
@@ -13,7 +12,7 @@ from telegram.ext import InlineQueryHandler, CallbackQueryHandler, ChosenInlineR
 
 from store import TinyDBStore
 
-from config import params, allowed_users, paths, chats, inline_status
+from config import params, allowed_users, paths, chats, inline_status, function
 
 import requests
 
@@ -159,6 +158,9 @@ def create_event_message(event, user):
               name=event['name'],
               date=format_date(event['date'])
           )
+          #message_text = "*{name}*\n".format(
+          #    name=event['name']
+          #)
 
           if 'description' in event:
               message_text += '\n_' + event['description'] + '_\n'
@@ -300,7 +302,7 @@ class InlineModule(object):
         f= open(paths['versions']+"tdesktop_version.txt","r")
         tdesk_version= f.read(10)
         f.close()
-        today= datetime.now()
+        today= datetime.datetime.now()
         dayraw = today.day
         if int(dayraw) < 10:
            day = '0' + str(dayraw)
@@ -648,15 +650,28 @@ class InlineModule(object):
                       is_personal=True
                   )
 
-        else:
-                  bot.answerInlineQuery(
-                      update.inline_query.id,
-                      results=results,
-                      cache_time=30,
-                      switch_pm_text='Ajuda del robot de Softcatalà',
-                      switch_pm_parameter='inline-users-help',
-                      is_personal=True
-                  )
+        elif function['production']:
+          results = []
+          packs = self.store.get_packs(query)
+
+          for pack in packs: 
+
+              result = InlineQueryResultCachedDocument(id=pack.eid,
+                                                       title=pack['name'],
+                                                       document_file_id=pack['cached_id'],
+                                                       description=pack['description'],
+                                                       caption=pack['howto'],
+                                                       )
+              results.append(result)
+
+          bot.answerInlineQuery(
+              update.inline_query.id,
+              results=results,
+              cache_time=30,
+              switch_pm_text='Ajuda del robot de Softcatalà',
+              switch_pm_parameter='inline-users-help',
+              is_personal=True
+          )
 
     def get_handlers(self):
         return self.handlers
