@@ -16,7 +16,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, InlineQueryHan
 from store import TinyDBStore
 from modules.inline import InlineModule
 
-from config import params, allowed_users, paths, chats, inline_status, links
+from config import params, allowed_users, paths, chats, inline_status, links, function
 
 
 class LangpackModule(object):
@@ -81,6 +81,9 @@ class LangpackModule(object):
                  bot.sendMessage(update.message.from_user.id,
                       parse_mode='Markdown',
                       text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
+        else:
+            bot.sendMessage(update.message.chat_id,
+                            text= "No teniu permisos per a realitzar aquesta acció.")
 
     def platform_handler(self, bot, update):
         f= open(paths['versions']+"android_version.txt","r")
@@ -223,11 +226,14 @@ class LangpackModule(object):
                              document=tdesktop_file)
             tdesktop_file_v= open(paths['local_packs']+'tdesktop-' +tdesk_version2+ '.strings', 'rb')
             bot.sendDocument(update.message.chat_id,
-                             document=tdesktop_file_v) 
+                             document=tdesktop_file_v)
+        else:
+            bot.sendMessage(update.message.chat_id,
+                            text= "No teniu permisos per a realitzar aquesta acció.")
 
     def download_command(self, bot, update, args):
         user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
+        if str(user_id) in allowed_users.values() or function['production']:
             if len(args) == 0:
                 keyboard = [[InlineKeyboardButton("Android", callback_data='Android'),
                          InlineKeyboardButton("iOS", callback_data='iOS'),
@@ -240,7 +246,7 @@ class LangpackModule(object):
                 )
             elif len(args) == 1 and args[0] == 'android-rebost':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"android_version.txt","r")
                       and_version= f.read(10)
                       f.close()
@@ -277,7 +283,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'ios-rebost':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"ios_version.txt","r")
                       ios_version= f.read(10)
                       f.close()
@@ -314,7 +320,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'tdesktop-rebost':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"tdesktop_version.txt","r")
                       tdesk_version= f.read(10)
                       f.close()
@@ -351,7 +357,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'android-channel':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"android_version.txt","r")
                       and_version= f.read(10)
                       f.close()
@@ -388,7 +394,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'ios-channel':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"ios_version.txt","r")
                       ios_version= f.read(10)
                       f.close()
@@ -425,7 +431,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'tdesktop-channel':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                       f= open(paths['versions']+"tdesktop_version.txt","r")
                       tdesk_version= f.read(10)
                       f.close()
@@ -462,7 +468,7 @@ class LangpackModule(object):
                           writer.writerow([stat])
             elif len(args) == 1 and args[0] == 'inline-users-help':
                   user_id = update.message.from_user.id
-                  if str(user_id) in allowed_users.values():
+                  if str(user_id) in allowed_users.values() or function['production']:
                          bot.sendMessage(update.message.chat_id,
                                          parse_mode='Markdown',
                                          text='Gràcies per utilitzar el *robot de Softcatalà*.\n\nUs deixem un enllaç amb instruccions detallades del seu funcionament.\n\n' + links['help'])
@@ -508,7 +514,7 @@ class LangpackModule(object):
 
     def android_command(self, bot, update):
         user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
+        if str(user_id) in allowed_users.values() or function['production']:
             f= open(paths['versions']+"android_version.txt","r")
             and_version= f.read(10)
             f.close()
@@ -552,7 +558,7 @@ class LangpackModule(object):
 
     def ios_command(self, bot, update):
         user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
+        if str(user_id) in allowed_users.values() or function['production']:
             f= open(paths['versions']+"ios_version.txt","r")
             ios_version= f.read(10)
             f.close()
@@ -596,7 +602,7 @@ class LangpackModule(object):
 
     def tdesktop_command(self, bot, update):
         user_id = update.message.from_user.id
-        if str(user_id) in allowed_users.values():
+        if str(user_id) in allowed_users.values() or function['production']:
             f= open(paths['versions']+"tdesktop_version.txt","r")
             tdesk_version= f.read(10)
             f.close()
