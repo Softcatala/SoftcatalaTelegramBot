@@ -426,24 +426,24 @@ class InlineModule(object):
                    if any(u['id'] == user['id'] and u['ihelp'] != 1 for u in event['users']):
                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                              callback_query_id=query.id
-                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \U0001F494 i no voleu participar-hi.")
+                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte ja no us agrada.")
                         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                              callback_query_id=query.id
-                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \u2764\uFE0F... Voleu participar-hi?")
+                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us agrada.")
                    elif any(u['id'] == user['id'] and u['ihelp'] == 1 for u in event['users']):
                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                              callback_query_id=query.id
-                             bot.answerCallbackQuery(callback_query_id=query.id, text="Gràcies per voler participar... Ja heu \u2764\uFE0F?")
+                             bot.answerCallbackQuery(callback_query_id=query.id, text="Us heu ofert per ajudar.")
                         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                              callback_query_id=query.id
-                             bot.answerCallbackQuery(callback_query_id=query.id, text="Gràcies per voler participar al projecte i per \u2764\uFE0F")
+                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us agrada i voleu ajudar.")
                 if event['help'] == 'No':
                    if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                         callback_query_id=query.id
-                        bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \U0001F494... Ho sentim.")
+                        bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte ja no us agrada.")
                    elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                         callback_query_id=query.id
-                        bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us \u2764\uFE0F... Gràcies!")
+                        bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us agrada.")
 
     def toggle_user(self, event, user):
         if not event.get('users'):
@@ -535,13 +535,13 @@ class InlineModule(object):
 
     def help_group(self, event, user):
         if user['username'] != '' and user['last_name'] != '':
-            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote("L'usuari ") + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" ") + urllib.parse.quote(user['last_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" ") + urllib.parse.quote(user['last_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
             return r
         elif user['username'] != '':
-            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote("L'usuari ") + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. Per contactar-hi: @') + urllib.parse.quote(user['username']) + urllib.parse.quote(' i per si us cal, ID d\'usuari: ') + str(user['id']) +'&parse_mode=Markdown')
             return r
         else:
-            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote("L'usuari ") + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. No podeu fer servir el nom d\'usuari pq no n\'utilitza. Haureu de fer-ho amb l\'ID d\'usuari: ') + str(user['id']) + urllib.parse.quote('.\nPer a facilitar-vos la feina us envio l\'ID d\'usuari en un altre missatge que podreu reenviar al robot') +'.&parse_mode=Markdown')
+            r = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + urllib.parse.quote(user['first_name']) + urllib.parse.quote(" vol col·laborar amb el projecte *") + urllib.parse.quote(event.get("name")) + urllib.parse.quote('*. No podeu fer servir el nom d\'usuari pq no n\'utilitza. Haureu de fer-ho amb l\'ID d\'usuari: ') + str(user['id']) + urllib.parse.quote('.\nPer a facilitar-vos la feina us envio l\'ID d\'usuari en un altre missatge que podreu reenviar al robot') +'.&parse_mode=Markdown')
             q = requests.get('https://api.telegram.org/bot' + params['token'] + '/sendMessage?chat_id=' + chats['group'] + '&text=' + str(user['id']) +'&parse_mode=Markdown')
             return r,q
 
