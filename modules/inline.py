@@ -426,7 +426,7 @@ class InlineModule(object):
                    if any(u['id'] == user['id'] and u['ihelp'] != 1 for u in event['users']):
                         if any(u['id'] == user['id'] and u['heart'] == 0 for u in event['users']):
                              callback_query_id=query.id
-                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us agrada.")
+                             bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte ja no us agrada.")
                         elif any(u['id'] == user['id'] and u['heart'] == 1 for u in event['users']):
                              callback_query_id=query.id
                              bot.answerCallbackQuery(callback_query_id=query.id, text="El projecte us agrada.")
