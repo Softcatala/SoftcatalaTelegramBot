@@ -81,9 +81,20 @@ class LangpackModule(object):
                  bot.sendMessage(update.message.from_user.id,
                       parse_mode='Markdown',
                       text= "Errors als *file_id* dels paquets de llengua: " +str(testfiles) + "\n  Fallen els paquets:\n" + testandroid + testios + testtdesktop)
+
+        elif function['production']:
+            f_name = update.message.from_user.first_name
+            bot.sendMessage(
+            update.message.chat_id,
+            text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+            reply_markup=ReplyKeyboardHide()
+            )
         else:
-            bot.sendMessage(update.message.chat_id,
-                            text= "No teniu permisos per a realitzar aquesta acció.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def platform_handler(self, bot, update):
         f= open(paths['versions']+"android_version.txt","r")
@@ -227,9 +238,20 @@ class LangpackModule(object):
             tdesktop_file_v= open(paths['local_packs']+'tdesktop-' +tdesk_version2+ '.strings', 'rb')
             bot.sendDocument(update.message.chat_id,
                              document=tdesktop_file_v)
+
+        elif function['production']:
+            f_name = update.message.from_user.first_name
+            bot.sendMessage(
+            update.message.chat_id,
+            text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+            reply_markup=ReplyKeyboardHide()
+            )
         else:
-            bot.sendMessage(update.message.chat_id,
-                            text= "No teniu permisos per a realitzar aquesta acció.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def download_command(self, bot, update, args):
         user_id = update.message.from_user.id
@@ -474,7 +496,7 @@ class LangpackModule(object):
                                          text='Gràcies per utilitzar el *robot de Softcatalà*.\n\nUs deixem un enllaç amb instruccions detallades del seu funcionament.\n\n' + links['help'])
                   else:
                          bot.sendMessage(update.message.chat_id,
-                                         text='Aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.')
+                                         text='Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.')
             #CHANGE INLINE STATUS
             elif len(args) == 1 and args[0] == 'change-inline-status':
                   user_id = update.message.from_user.id
@@ -501,16 +523,26 @@ class LangpackModule(object):
 			           parse_mode='Markdown',
 			           text= "Ara sou un usuari *administrador* per a les consultes _inline_."
 	                    )
+                  else:
+                      f_name = update.message.from_user.first_name
+                      bot.sendMessage(
+                      update.message.chat_id,
+                      text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+                      reply_markup=ReplyKeyboardHide()
+                      )
+
             else:
                 bot.sendMessage(update.message.chat_id,
 			    parse_mode='Markdown',
 			    text= "Ho lamento, aquesta ordre no accepta paràmetres. Envieu només /start."
 	        )
+
         else:
-            f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
-                            text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def android_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -551,10 +583,11 @@ class LangpackModule(object):
                 writer.writerow([stat])
 
         else:
-            f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
-                            text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def ios_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -595,10 +628,11 @@ class LangpackModule(object):
                 writer.writerow([stat])
 
         else:
-            f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
-                            text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def tdesktop_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -639,10 +673,11 @@ class LangpackModule(object):
                 writer.writerow([stat])
 
         else:
-            f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
-                            text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def stats_command(self, bot, update):
         user_id = update.message.from_user.id
@@ -727,11 +762,19 @@ class LangpackModule(object):
             bot.sendDocument(update.message.chat_id,
                              document=stats_file) 
 
-        else:
+        elif function['production']:
             f_name = update.message.from_user.first_name
-            bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
-                            text= str(f_name) + ", aquest bot no és operatiu. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.")
+            bot.sendMessage(
+            update.message.chat_id,
+            text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.",
+            reply_markup=ReplyKeyboardHide()
+            )
+        else:
+            bot.sendMessage(
+            update.message.chat_id,
+            text="Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.",
+            reply_markup=ReplyKeyboardHide()
+            )
 
     def get_handlers(self):
         return self.handlers

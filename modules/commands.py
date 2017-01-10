@@ -1358,7 +1358,7 @@ class CommandsModule(object):
              bot.sendMessage(
                  chat_id= chats['group'],
                  parse_mode='Markdown',
-                 text= '*' + str(f_name) + '* ha creat una publicació pel projecte: *«' + event['name'] + '»*.'
+                 text= '*' + str(f_name) + '* ha creat una publicació per al projecte: *«' + event['name'] + '»*.'
              )
         self.store.insert_event(event)
         self.store.remove_draft(update.message.from_user.id)
