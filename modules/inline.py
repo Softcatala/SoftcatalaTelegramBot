@@ -124,22 +124,26 @@ def create_keyboard(event, user):
                old_tdesk= ' (' + tdesktop_date + ')'
           else:
                old_tdesk= ''
+          if function['production']:
+               bot_url='http://telegram.me/Softcatalabot'
+          else:
+               bot_url='http://telegram.me/Softcataladesenvolupamentbot'
           button1 = [
               InlineKeyboardButton(
                   text="Android" + old_and,
-                  url='http://telegram.me/Softcatalabot?start=android-channel'
+                  url= bot_url + '?start=android-channel'
               )
           ]
           button2 = [
               InlineKeyboardButton(
                   text="iOS" + old_ios,
-                  url='http://telegram.me/Softcatalabot?start=ios-channel'
+                  url= bot_url + '?start=ios-channel'
               )
           ]
           button3 = [
               InlineKeyboardButton(
                   text="TDesktop" + old_tdesk,
-                  url='http://telegram.me/Softcatalabot?start=tdesktop-channel'
+                  url= bot_url + '?start=tdesktop-channel'
               )
           ]
 
