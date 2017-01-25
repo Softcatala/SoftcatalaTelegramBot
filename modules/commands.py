@@ -310,11 +310,9 @@ class CommandsModule(object):
                              text= "Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.")
             elif function['production'] and chat != chats['group']:
                  bot.sendMessage(update.message.chat_id,
-                             parse_mode='Markdown',
                              text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.")
             else:
                  bot.sendMessage(update.message.chat_id,
-                             parse_mode='Markdown',
                              text= "No es permet crear publicacions des del grup.")
 
     def admin_command(self, bot, update):
@@ -327,11 +325,9 @@ class CommandsModule(object):
         else:
             if function['production']:
                 bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
                             text= str(f_name) + ", no teniu permisos per utilitzar aquesta ordre. Les ordres que teniu disponibles ara mateix són: /baixa /android /ios /tdesktop i /help.")
             else:
                 bot.sendMessage(update.message.chat_id,
-                            parse_mode='Markdown',
                             text= "Robot destinat a proves internes de Softcatalà. Si cerqueu el bot públic de Softcatalà el trobareu a @SoftcatalaBot.")
 
     def message(self, bot, update):
