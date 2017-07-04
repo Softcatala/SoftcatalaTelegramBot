@@ -645,7 +645,7 @@ class CommandsModule(object):
                  bot.sendMessage(
                  update.message.chat_id,
                  parse_mode='Markdown',
-                 text="\U0001F914 No entenc el que em voleu dir, però sóc un robot \U0001F916 i encara no sóc en funcionament. Si cerqueu el paquet de llengua en català per al Telegram, aneu a @softcatala.",
+                 text="\U0001F914 No entenc el que em voleu dir, però sóc un robot \U0001F916 i el meu funcionament és molt senzill. Envieu-me l'ordre /start i trieu la plataforma adient 😉.",
                  reply_markup=ReplyKeyboardHide()
                  )
             #else:
